@@ -2,6 +2,9 @@
 
 namespace Gpos\FilamentJibble\Providers;
 
+use Gpos\FilamentJibble\Services\Jibble\JibbleClient;
+use Gpos\FilamentJibble\Services\Jibble\JibbleManager;
+use Gpos\FilamentJibble\Services\Jibble\JibbleTokenManager;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
 use Gpos\FilamentJibble\Support\JibbleConnectionResolver;
 use Gpos\FilamentJibble\Filament\Widgets\TimesheetHeatmap;
@@ -15,6 +18,7 @@ use Gpos\FilamentJibble\Models\JibbleTimesheetSummary;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -31,6 +35,40 @@ class FilamentJibbleServiceProvider extends ServiceProvider
             return new JibbleConnectionFactory(
                 $app->make(HttpFactory::class),
                 $app->make(CacheRepository::class),
+            );
+        });
+
+        $this->app->singleton(JibbleTokenManager::class, function ($app): JibbleTokenManager {
+            $config = $this->jibbleConfig();
+
+            return new JibbleTokenManager(
+                $app->make(HttpFactory::class),
+                $app->make(CacheRepository::class),
+                $config,
+            );
+        });
+
+        $this->app->singleton(JibbleClient::class, function ($app): JibbleClient {
+            $config = $this->jibbleConfig();
+
+            return new JibbleClient(
+                http: $app->make(HttpFactory::class),
+                baseUrl: (string) Arr::get($config, 'base_url', ''),
+                token: Arr::get($config, 'api_token'),
+                tokenManager: $app->make(JibbleTokenManager::class),
+                pathPrefix: Arr::get($config, 'path_prefix'),
+                organizationUuid: Arr::get($config, 'organization_uuid'),
+                httpConfig: (array) Arr::get($config, 'http', []),
+                paginationConfig: (array) Arr::get($config, 'pagination', []),
+            );
+        });
+
+        $this->app->singleton(JibbleManager::class, function ($app): JibbleManager {
+            $config = $this->jibbleConfig();
+
+            return new JibbleManager(
+                client: $app->make(JibbleClient::class),
+                config: $config,
             );
         });
 
@@ -104,5 +142,12 @@ class FilamentJibbleServiceProvider extends ServiceProvider
         foreach ($models as $model) {
             $model::resolveRelationUsing($relationship, static fn ($model) => $model->tenant());
         }
+    }
+
+    private function jibbleConfig(): array
+    {
+        $config = config('jibble', []);
+
+        return is_array($config) ? $config : [];
     }
 }
