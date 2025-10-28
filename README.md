@@ -9,6 +9,7 @@ A fresh Laravel 11 + Filament 4 application prepared to integrate the complete [
 ## Requirements
 
 - PHP 8.2 or higher with required extensions.
+- Laravel 11 or 12 (Illuminate components ^11/^12).
 - Composer 2.4+.
 - Node 18+ and npm if you plan to run the Vite dev server for the Filament UI assets.
 
