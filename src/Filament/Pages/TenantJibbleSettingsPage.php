@@ -140,36 +140,36 @@ class TenantJibbleSettingsPage extends Page implements HasForms
                     ])->columnSpanFull()
                     ->columns(2),
 
-                Section::make(__('filament-jibble::resources.pages.profile.section_title') ?: 'Jibble preferences')
-                    ->description(__('filament-jibble::resources.pages.profile.helpers.default_project') ? __('filament-jibble::resources.pages.profile.helpers.default_project') : null)
+                Section::make(__('filament-jibble::resources.pages.tenant.profile.section_title') ?: 'Jibble preferences')
+                    ->description(__('filament-jibble::resources.pages.tenant.profile.helpers.default_project') ? __('filament-jibble::resources.pages.tenant.profile.helpers.default_project') : null)
                     ->schema([
                         Forms\Components\Select::make('default_project_id')
-                            ->label(__('filament-jibble::resources.pages.profile.fields.default_project'))
+                            ->label(__('filament-jibble::resources.pages.tenant.profile.fields.default_project'))
                             ->options(fn (): array => $this->projectOptions)
-                            ->placeholder(__('filament-jibble::resources.pages.profile.placeholders.default_project'))
-                            ->helperText(__('filament-jibble::resources.pages.profile.helpers.default_project'))
+                            ->placeholder(__('filament-jibble::resources.pages.tenant.profile.placeholders.default_project'))
+                            ->helperText(__('filament-jibble::resources.pages.tenant.profile.helpers.default_project'))
                             ->searchable()
                             ->allowHtml(false)
                             ->live(debounce: 400)
                             ->nullable()
                             ->hintAction(
                                 Action::make('fetch-projects')
-                                    ->label(__('filament-jibble::resources.pages.profile.actions.fetch_projects'))
+                                    ->label(__('filament-jibble::resources.pages.tenant.profile.actions.fetch_projects'))
                                     ->icon('heroicon-o-arrow-path')
                                     ->action('fetchProjects')
                             ),
                         Forms\Components\Select::make('default_group_id')
-                            ->label(__('filament-jibble::resources.pages.profile.fields.default_group'))
+                            ->label(__('filament-jibble::resources.pages.tenant.profile.fields.default_group'))
                             ->options(fn (): array => $this->groupOptions)
-                            ->placeholder(__('filament-jibble::resources.pages.profile.placeholders.default_group'))
-                            ->helperText(__('filament-jibble::resources.pages.profile.helpers.default_group'))
+                            ->placeholder(__('filament-jibble::resources.pages.tenant.profile.placeholders.default_group'))
+                            ->helperText(__('filament-jibble::resources.pages.tenant.profile.helpers.default_group'))
                             ->searchable()
                             ->allowHtml(false)
                             ->live(debounce: 400)
                             ->nullable()
                             ->hintAction(
                                 Action::make('fetch-groups')
-                                    ->label(__('filament-jibble::resources.pages.profile.actions.fetch_groups'))
+                                    ->label(__('filament-jibble::resources.pages.tenant.profile.actions.fetch_groups'))
                                     ->icon('heroicon-o-arrow-path')
                                     ->action('fetchGroups')
                             ),
@@ -390,8 +390,8 @@ class TenantJibbleSettingsPage extends Page implements HasForms
             if (empty($projects)) {
                 Notification::make()
                     ->warning()
-                    ->title(__('filament-jibble::resources.pages.profile.notifications.no_projects.title'))
-                    ->body(__('filament-jibble::resources.pages.profile.notifications.no_projects.body'))
+                    ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.no_projects.title'))
+                    ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.no_projects.body'))
                     ->send();
 
                 return;
@@ -409,13 +409,13 @@ class TenantJibbleSettingsPage extends Page implements HasForms
 
             Notification::make()
                 ->success()
-                ->title(__('filament-jibble::resources.pages.profile.notifications.projects_loaded.title'))
-                ->body(__('filament-jibble::resources.pages.profile.notifications.projects_loaded.body'))
+                ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.projects_loaded.title'))
+                ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.projects_loaded.body'))
                 ->send();
         } catch (Throwable $exception) {
             Notification::make()
                 ->danger()
-                ->title(__('filament-jibble::resources.pages.profile.notifications.projects_failed.title'))
+                ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.projects_failed.title'))
                 ->body(Str::limit($exception->getMessage(), 200))
                 ->send();
         }
@@ -447,8 +447,8 @@ class TenantJibbleSettingsPage extends Page implements HasForms
             if (empty($groups)) {
                 Notification::make()
                     ->warning()
-                    ->title(__('filament-jibble::resources.pages.profile.notifications.no_groups.title'))
-                    ->body(__('filament-jibble::resources.pages.profile.notifications.no_groups.body'))
+                    ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.no_groups.title'))
+                    ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.no_groups.body'))
                     ->send();
 
                 return;
@@ -466,13 +466,13 @@ class TenantJibbleSettingsPage extends Page implements HasForms
 
             Notification::make()
                 ->success()
-                ->title(__('filament-jibble::resources.pages.profile.notifications.groups_loaded.title'))
-                ->body(__('filament-jibble::resources.pages.profile.notifications.groups_loaded.body'))
+                ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.groups_loaded.title'))
+                ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.groups_loaded.body'))
                 ->send();
         } catch (Throwable $exception) {
             Notification::make()
                 ->danger()
-                ->title(__('filament-jibble::resources.pages.profile.notifications.groups_failed.title'))
+                ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.groups_failed.title'))
                 ->body(Str::limit($exception->getMessage(), 200))
                 ->send();
         }
@@ -551,8 +551,8 @@ class TenantJibbleSettingsPage extends Page implements HasForms
 
         Notification::make()
             ->warning()
-            ->title(__('filament-jibble::resources.pages.profile.notifications.requires_connection.title'))
-            ->body(__('filament-jibble::resources.pages.profile.notifications.requires_connection.body'))
+            ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.requires_connection.title'))
+            ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.requires_connection.body'))
             ->send();
 
         return false;
@@ -562,8 +562,8 @@ class TenantJibbleSettingsPage extends Page implements HasForms
     {
         Notification::make()
             ->warning()
-            ->title(__('filament-jibble::resources.pages.profile.notifications.requires_organization.title'))
-            ->body(__('filament-jibble::resources.pages.profile.notifications.requires_organization.body'))
+            ->title(__('filament-jibble::resources.pages.tenant.profile.notifications.requires_organization.title'))
+            ->body(__('filament-jibble::resources.pages.tenant.profile.notifications.requires_organization.body'))
             ->send();
     }
 
