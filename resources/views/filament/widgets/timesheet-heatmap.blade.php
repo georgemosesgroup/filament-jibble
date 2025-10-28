@@ -47,7 +47,7 @@
                                 </div>
                             </th>
                         @endforeach
-                        <th class="min-w-[90px] whitespace-nowrap py-2 pl-4 text-right font-medium">
+                        <th class="min-w-[2rem] whitespace-nowrap py-2 pl-4 text-right font-medium">
                             {{ __('filament-jibble::resources.widgets.timesheet_heatmap.total') }}
                         </th>
                     </tr>
