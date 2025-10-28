@@ -9,10 +9,25 @@ return new class extends Migration
     public function up(): void
     {
         $tenantColumn = (string) config('filament-jibble.tenant_foreign_key', 'tenant_id');
+        $tenantColumnType = (string) config('filament-jibble.tenant_foreign_key_type', 'uuid');
 
-        Schema::create('jibble_connections', function (Blueprint $table) use ($tenantColumn): void {
+        $addTenantColumn = function (Blueprint $table) use ($tenantColumn, $tenantColumnType): void {
+            $column = match ($tenantColumnType) {
+                'ulid' => $table->ulid($tenantColumn),
+                'string' => $table->string($tenantColumn, 191),
+                'integer' => $table->integer($tenantColumn),
+                'bigInteger' => $table->bigInteger($tenantColumn),
+                'unsignedBigInteger' => $table->unsignedBigInteger($tenantColumn),
+                default => $table->uuid($tenantColumn),
+            };
+
+            $column->nullable();
+            $table->index($tenantColumn);
+        };
+
+        Schema::create('jibble_connections', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->text('user_id')->nullable();
             $table->string('name')->default('default');
             $table->string('organization_uuid')->nullable();
@@ -29,9 +44,9 @@ return new class extends Migration
             $table->unique(['user_id', 'name']);
         });
 
-        Schema::create('jibble_people', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_people', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->string('jibble_id')->index();
             $table->string('email')->nullable()->index();
@@ -46,9 +61,9 @@ return new class extends Migration
             $table->unique(['connection_id', 'jibble_id']);
         });
 
-        Schema::create('jibble_timesheet_summaries', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_timesheet_summaries', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->uuid('person_id')->nullable()->index();
             $table->string('jibble_person_id')->nullable()->index();
@@ -66,9 +81,9 @@ return new class extends Migration
             $table->unique(['connection_id', 'period', 'date', 'jibble_person_id'], 'timesheet_unique');
         });
 
-        Schema::create('jibble_sync_logs', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_sync_logs', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->nullable()->index();
             $table->string('resource');
             $table->string('status')->default('queued');
@@ -78,9 +93,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('jibble_time_entries', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_time_entries', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->uuid('person_id')->nullable()->index();
             $table->string('jibble_entry_id')->index();
@@ -125,9 +140,9 @@ return new class extends Migration
             $table->unique(['connection_id', 'jibble_entry_id']);
         });
 
-        Schema::create('jibble_timesheets', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_timesheets', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->uuid('person_id')->nullable()->index();
             $table->string('jibble_timesheet_id')->index();
@@ -145,9 +160,9 @@ return new class extends Migration
             $table->unique(['connection_id', 'jibble_timesheet_id']);
         });
 
-        Schema::create('jibble_locations', function (Blueprint $table) use ($tenantColumn): void {
+        Schema::create('jibble_locations', function (Blueprint $table) use ($tenantColumn, $addTenantColumn): void {
             $table->uuid('id')->primary();
-            $table->uuid($tenantColumn)->nullable()->index();
+            $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->string('jibble_location_id')->index();
             $table->string('name')->nullable();

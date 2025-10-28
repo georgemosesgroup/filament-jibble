@@ -123,7 +123,7 @@ A tenant registration page and profile editor are included when tenancy is activ
 If you use a custom user class, set `FILAMENT_JIBBLE_USER_MODEL` (or `filament-jibble.user_model`) so the package can resolve the correct relation.
 
 If your panel uses a different tenant relationship name (for example `branch`), set `FILAMENT_JIBBLE_TENANT_RELATIONSHIP=branch` so the package registers the same relationship on its models automatically.
-If your project stores tenant references under another column (for example `branch_id`), set `FILAMENT_JIBBLE_TENANT_FOREIGN_KEY=branch_id` **before running the package migrations** so all tables use the matching column name.
+If your project stores tenant references under another column (for example `branch_id`), set `FILAMENT_JIBBLE_TENANT_FOREIGN_KEY=branch_id` **before running the package migrations** so all tables use the matching column name. When the column isn't a UUID, also configure `FILAMENT_JIBBLE_TENANT_FOREIGN_KEY_TYPE` (`uuid`, `ulid`, `string`, `integer`, `bigInteger`, or `unsignedBigInteger`) to match the data type used in your application.
 
 ## Next Steps
 

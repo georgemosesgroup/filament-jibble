@@ -69,6 +69,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant Foreign Key Column Type
+    |--------------------------------------------------------------------------
+    |
+    | Set the column type used for the tenant foreign key when running the
+    | package migrations. Supported values: uuid, ulid, string, integer,
+    | bigInteger, unsignedBigInteger. Defaults to uuid.
+    |
+    */
+    'tenant_foreign_key_type' => env('FILAMENT_JIBBLE_TENANT_FOREIGN_KEY_TYPE', 'uuid'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Models
     |--------------------------------------------------------------------------
     |
