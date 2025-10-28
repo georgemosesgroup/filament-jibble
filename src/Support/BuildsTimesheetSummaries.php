@@ -6,8 +6,10 @@ use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Models\JibbleTimesheetSummary;
 use Gpos\FilamentJibble\Support\TenantHelper;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait BuildsTimesheetSummaries
 {
@@ -34,64 +36,98 @@ trait BuildsTimesheetSummaries
         $start = $startDate->toDateString();
         $end = $endDate->toDateString();
 
-        JibbleTimesheetSummary::query()
-            ->withTrashed()
-            ->where('connection_id', $connection->id)
-            ->where('period', 'Range')
-            ->whereDate('date', $start)
-            ->forceDelete();
-
         $tenantColumn = TenantHelper::tenantColumn();
-        $timestamp = now();
-        $records = [];
+        DB::transaction(function () use ($connection, $rows, $start, $end, $tenantColumn): void {
+            $keepIds = [];
+            $keepNull = false;
 
-        foreach ($rows as $row) {
-            $tracked = (int) ($row->tracked_seconds ?? 0);
-            $billable = (int) ($row->billable_seconds ?? 0);
-            $break = (int) ($row->break_seconds ?? 0);
+            foreach ($rows as $row) {
+                $tracked = (int) ($row->tracked_seconds ?? 0);
+                $billable = (int) ($row->billable_seconds ?? 0);
+                $break = (int) ($row->break_seconds ?? 0);
 
-            if ($tracked === 0 && $billable === 0) {
-                continue;
+                $jibblePersonId = $row->jibble_person_id;
+
+                if ($tracked === 0 && $billable === 0) {
+                    continue;
+                }
+
+                if ($jibblePersonId === null) {
+                    $keepNull = true;
+                } else {
+                    $keepIds[] = $jibblePersonId;
+                }
+
+                $attributes = [
+                    'connection_id' => $connection->id,
+                    'period' => 'Range',
+                    'date' => $start,
+                    'jibble_person_id' => $jibblePersonId,
+                ];
+
+                $values = [
+                    $tenantColumn => $connection->getTenantKey(),
+                    'person_id' => $row->person_id,
+                    'tracked_seconds' => $tracked,
+                    'payroll_seconds' => $billable,
+                    'regular_seconds' => $billable,
+                    'overtime_seconds' => max(0, $tracked - $billable),
+                    'daily_breakdown' => null,
+                    'summary' => [
+                        'start_date' => $start,
+                        'end_date' => $end,
+                        'break_seconds' => $break,
+                    ],
+                ];
+
+                try {
+                    $summary = JibbleTimesheetSummary::query()
+                        ->withTrashed()
+                        ->updateOrCreate($attributes, $values);
+                } catch (QueryException $exception) {
+                    if ($exception->getCode() !== '23505') {
+                        throw $exception;
+                    }
+
+                    $summary = JibbleTimesheetSummary::query()
+                        ->withTrashed()
+                        ->where($attributes)
+                        ->firstOrNew();
+
+                    $summary->fill(array_merge($attributes, $values));
+                    $summary->save();
+                }
+
+                if ($summary->trashed()) {
+                    $summary->restore();
+                }
             }
 
-            $records[] = [
-                'connection_id' => $connection->id,
-                'jibble_person_id' => $row->jibble_person_id,
-                'date' => $start,
-                'period' => 'Range',
-                $tenantColumn => $connection->getTenantKey(),
-                'person_id' => $row->person_id,
-                'tracked_seconds' => $tracked,
-                'payroll_seconds' => $billable,
-                'regular_seconds' => $billable,
-                'overtime_seconds' => max(0, $tracked - $billable),
-                'daily_breakdown' => null,
-                'summary' => json_encode([
-                    'start_date' => $start,
-                    'end_date' => $end,
-                    'break_seconds' => $break,
-                ]),
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp,
-            ];
-        }
+            $keepIds = array_values(array_unique($keepIds));
 
-        if (! empty($records)) {
-            JibbleTimesheetSummary::query()->upsert(
-                $records,
-                ['connection_id', 'period', 'date', 'jibble_person_id'],
-                [
-                    $tenantColumn,
-                    'person_id',
-                    'tracked_seconds',
-                    'payroll_seconds',
-                    'regular_seconds',
-                    'overtime_seconds',
-                    'daily_breakdown',
-                    'summary',
-                    'updated_at',
-                ]
-            );
-        }
+            $existing = JibbleTimesheetSummary::query()
+                ->withTrashed()
+                ->where('connection_id', $connection->id)
+                ->where('period', 'Range')
+                ->whereDate('date', $start)
+                ->get();
+
+            $idsToDelete = $existing->filter(function (JibbleTimesheetSummary $summary) use ($keepIds, $keepNull): bool {
+                $personId = $summary->jibble_person_id;
+
+                if ($personId === null) {
+                    return ! $keepNull;
+                }
+
+                return ! in_array($personId, $keepIds, true);
+            })->pluck('id');
+
+            if ($idsToDelete->isNotEmpty()) {
+                JibbleTimesheetSummary::query()
+                    ->withTrashed()
+                    ->whereIn('id', $idsToDelete)
+                    ->forceDelete();
+            }
+        });
     }
 }

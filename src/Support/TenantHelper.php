@@ -47,16 +47,25 @@ class TenantHelper
             return $callback();
         }
 
+        if ($tenant && ! method_exists($manager, 'setTenant')) {
+            return $callback();
+        }
+
         $original = static::current();
 
-        $setTenant = fn (?Model $model) => method_exists($manager, 'setTenant')
-            ? Filament::setTenant($model)
-            : null;
+        $setTenant = function (?Model $model): void {
+            $manager = Filament::getFacadeRoot();
+
+            if (! $manager || ! method_exists($manager, 'setTenant')) {
+                return;
+            }
+
+            Filament::setTenant($model, true);
+        };
 
         $forgetTenant = fn () => method_exists($manager, 'forgetTenant')
             ? Filament::forgetTenant()
             : null;
-
         if ($tenant) {
             $setTenant($tenant);
         } elseif ($original) {
