@@ -35,10 +35,11 @@ trait BuildsTimesheetSummaries
         $end = $endDate->toDateString();
 
         JibbleTimesheetSummary::query()
+            ->withTrashed()
             ->where('connection_id', $connection->id)
             ->where('period', 'Range')
             ->whereDate('date', $start)
-            ->delete();
+            ->forceDelete();
 
         $tenantColumn = TenantHelper::tenantColumn();
 

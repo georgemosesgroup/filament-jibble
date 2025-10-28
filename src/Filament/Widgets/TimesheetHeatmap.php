@@ -204,12 +204,12 @@ class TimesheetHeatmap extends Widget implements HasForms
     protected function mapTimesheetSlot(string $date, ?int $minutes, ?int $overtime): array
     {
         $status = $this->determineStatus($minutes, (int) ($overtime ?? 0));
-        $styles = $this->statusStyles()[$status];
+        $styles = $this->statusStyles()[$status] ?? $this->statusStyles()['missing'];
 
         return [
             'status' => $status,
-            'classes' => 'timesheet-slot',
-            'style' => $styles['style'],
+            'classes' => trim('timesheet-slot block h-5 w-5 rounded-md transition-colors duration-200 '.$styles['classes']),
+            'style' => '',
             'tooltip' => $this->buildTooltip($styles['label'], $minutes, $date),
             'minutes_formatted' => $this->formatMinutes($minutes),
         ];
@@ -278,23 +278,23 @@ class TimesheetHeatmap extends Widget implements HasForms
     {
         return [
             'missing' => [
-                'style' => 'background-color:#e5e7eb;',
+                'classes' => 'bg-gray-200 ring-1 ring-inset ring-white/80 dark:bg-gray-700/70 dark:ring-gray-900/40',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.missing'),
             ],
             'off' => [
-                'style' => 'background-color:#d1d5db;',
+                'classes' => 'bg-slate-300 ring-1 ring-inset ring-white/70 dark:bg-slate-600 dark:ring-gray-900/40',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.off'),
             ],
             'target' => [
-                'style' => 'background-color:#22c55e;',
+                'classes' => 'bg-emerald-500/90 ring-1 ring-inset ring-emerald-300/60 dark:bg-emerald-400',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.target'),
             ],
             'extended' => [
-                'style' => 'background-color:#facc15;',
+                'classes' => 'bg-amber-400/90 ring-1 ring-inset ring-amber-200/70 dark:bg-amber-400',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.extended'),
             ],
             'overtime' => [
-                'style' => 'background-color:#ef4444;',
+                'classes' => 'bg-rose-500/95 ring-1 ring-inset ring-rose-300/70 dark:bg-rose-500',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.overtime'),
             ],
         ];
@@ -311,8 +311,8 @@ class TimesheetHeatmap extends Widget implements HasForms
         return collect($order)
             ->filter(fn(string $key) => isset($styles[$key]))
             ->map(fn(string $key) => [
-                'classes' => 'timesheet-slot',
-                'style' => $styles[$key]['style'],
+                'classes' => trim('timesheet-slot inline-block h-3 w-3 rounded-sm '.$styles[$key]['classes']),
+                'style' => '',
                 'label' => $styles[$key]['label'],
             ])
             ->values()

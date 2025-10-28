@@ -1,14 +1,3 @@
-@pushOnce('styles', 'timesheet-heatmap')
-    <style>
-        .fi-widget-timesheet-heatmap .timesheet-slot {
-            display: block;
-            height: 1.25rem;
-            width: 1.25rem;
-            border-radius: 0.375rem;
-        }
-    </style>
-@endPushOnce
-
 @php
     $tenant = filament()->getTenant();
 @endphp
@@ -42,14 +31,14 @@
             </div>
         @else
             <div class="mt-6 overflow-x-auto">
-                <table class="min-w-full border-separate text-sm" style="border-spacing: 0 12px;">
+                <table class="min-w-[56rem] w-full border-separate whitespace-nowrap text-sm" style="border-spacing: 0 12px;">
                     <thead>
                     <tr class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        <th class="min-w-[220px] py-2 pr-4 text-left font-medium">
+                        <th class="min-w-[220px] whitespace-nowrap py-2 pr-4 text-left font-medium">
                             {{ __('filament-jibble::resources.widgets.timesheet_heatmap.employee') }}
                         </th>
                         @foreach ($days as $day)
-                            <th class="w-8 text-center font-medium">
+                            <th class="w-10 px-1 text-center font-medium">
                                 <div class="text-[11px] text-gray-400 dark:text-gray-500">
                                     {{ $day['day'] ?? '?' }}
                                 </div>
@@ -58,7 +47,7 @@
                                 </div>
                             </th>
                         @endforeach
-                        <th class="min-w-[90px] py-2 pl-4 text-right font-medium">
+                        <th class="min-w-[90px] whitespace-nowrap py-2 pl-4 text-right font-medium">
                             {{ __('filament-jibble::resources.widgets.timesheet_heatmap.total') }}
                         </th>
                     </tr>
@@ -89,15 +78,14 @@
                                 </div>
                             </td>
                                 @foreach ($person['slots'] ?? [] as $slot)
-                                    <td class="py-2 text-center">
+                                    <td class="px-1 py-2 text-center">
                                         <span
                                             class="{{ $slot['classes'] ?? 'timesheet-slot' }}"
-                                            style="{{ $slot['style'] ?? '' }}"
                                             title="{{ $slot['tooltip'] ?? 'No tooltip' }}"
                                         ></span>
                                     </td>
                                 @endforeach
-                            <td class="pl-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            <td class="whitespace-nowrap pl-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
                                 {{ $person['total_formatted'] ?? '—' }}
                             </td>
                         </tr>
@@ -118,7 +106,7 @@
                     </span>
                     @foreach ($this->legend as $legendItem)
                         <span class="inline-flex items-center gap-2">
-                            <span class="{{ $legendItem['classes'] }}" style="{{ $legendItem['style'] ?? '' }}"></span>
+                            <span class="{{ $legendItem['classes'] }}"></span>
                             {{ $legendItem['label'] }}
                         </span>
                     @endforeach
