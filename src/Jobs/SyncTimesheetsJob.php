@@ -43,7 +43,9 @@ class SyncTimesheetsJob implements ShouldQueue
     public function handle(JibbleConnectionFactory $factory): void
     {
         /** @var JibbleConnection|null $connection */
-        $connection = JibbleConnection::query()->find($this->connectionId);
+        $connection = JibbleConnection::query()
+            ->with('tenant')
+            ->find($this->connectionId);
 
         if (! $connection) {
             Log::warning('SyncTimesheetsJob: connection not found', ['connection_id' => $this->connectionId]);
@@ -51,10 +53,17 @@ class SyncTimesheetsJob implements ShouldQueue
             return;
         }
 
+        TenantHelper::forTenant($connection->tenant, function () use ($factory, $connection): void {
+            $this->runForConnection($factory, $connection);
+        });
+    }
+
+    private function runForConnection(JibbleConnectionFactory $factory, JibbleConnection $connection): void
+    {
         $organizationUuid = $connection->organization_uuid ?? config('jibble.organization_uuid');
 
         if (blank($organizationUuid)) {
-            Log::error('SyncTimesheetsJob aborted: missing organization uuid', ['connection_id' => $this->connectionId]);
+            Log::error('SyncTimesheetsJob aborted: missing organization uuid', ['connection_id' => $connection->id]);
 
             return;
         }
@@ -90,7 +99,7 @@ class SyncTimesheetsJob implements ShouldQueue
                     ]);
                 } catch (Throwable $exception) {
                     Log::error('SyncTimesheetsJob failed to fetch timesheets', [
-                        'connection_id' => $this->connectionId,
+                        'connection_id' => $connection->id,
                         'message' => $exception->getMessage(),
                         'date' => $query['Date'] ?? null,
                         'end_date' => $query['EndDate'] ?? null,
@@ -114,7 +123,7 @@ class SyncTimesheetsJob implements ShouldQueue
                         $nextResponse = $manager->client()->request('GET', $nextLink);
                     } catch (Throwable $exception) {
                         Log::error('SyncTimesheetsJob failed on next page', [
-                            'connection_id' => $this->connectionId,
+                            'connection_id' => $connection->id,
                             'message' => $exception->getMessage(),
                             'date' => $query['Date'] ?? null,
                             'end_date' => $query['EndDate'] ?? null,

@@ -2,7 +2,6 @@
 
 return [
     'base_url' => env('JIBBLE_BASE_URL', 'https://workspace.prod.jibble.io/v1'),
-    'path_prefix' => env('JIBBLE_PATH_PREFIX'),
 
     'services' => [
         'workspace' => env('JIBBLE_BASE_URL', 'https://workspace.prod.jibble.io/v1'),
