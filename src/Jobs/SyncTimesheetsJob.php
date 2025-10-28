@@ -29,6 +29,10 @@ class SyncTimesheetsJob implements ShouldQueue
     use SerializesModels;
     use BuildsTimesheetSummaries;
 
+    protected bool $periodProvided = false;
+
+    protected int $maxChunkDays = 7;
+
     public function __construct(
         public readonly string $connectionId,
         public readonly array $query = [],
@@ -71,43 +75,25 @@ class SyncTimesheetsJob implements ShouldQueue
 
         $batches = $this->personIdChunks($connection);
 
-        foreach ($batches as $personIds) {
-            $query = $baseQuery;
+        $rangeStart = Carbon::parse($baseQuery['Date']);
+        $rangeEnd = isset($baseQuery['EndDate'])
+            ? Carbon::parse($baseQuery['EndDate'])
+            : $rangeStart->copy();
 
-            if ($personIds !== null) {
-                $query['PersonIds'] = $personIds;
-            }
+        foreach ($this->chunkDateRange($rangeStart, $rangeEnd) as [$chunkStart, $chunkEnd]) {
+            foreach ($batches as $personIds) {
+                $query = $this->prepareChunkQuery($baseQuery, $chunkStart, $chunkEnd, $personIds);
 
-            try {
-                $response = $manager->resource('timesheets')->list($query, [
-                    'organization_uuid' => $organizationUuid,
-                ]);
-            } catch (Throwable $exception) {
-                Log::error('SyncTimesheetsJob failed to fetch timesheets', [
-                    'connection_id' => $this->connectionId,
-                    'message' => $exception->getMessage(),
-                ]);
-
-                $log->update([
-                    'status' => 'failed',
-                    'message' => $exception->getMessage(),
-                    'finished_at' => now(),
-                ]);
-
-                throw $exception;
-            }
-
-            $this->persistItems($connection, $response->items());
-
-            $nextLink = Arr::get($response->toResponse()->json(), '@odata.nextLink');
-
-            while ($nextLink) {
                 try {
-                    $nextResponse = $manager->client()->request('GET', $nextLink);
+                    $response = $manager->resource('timesheets')->list($query, [
+                        'organization_uuid' => $organizationUuid,
+                    ]);
                 } catch (Throwable $exception) {
-                    Log::error('SyncTimesheetsJob failed on next page', [
+                    Log::error('SyncTimesheetsJob failed to fetch timesheets', [
                         'connection_id' => $this->connectionId,
                         'message' => $exception->getMessage(),
+                        'date' => $query['Date'] ?? null,
+                        'end_date' => $query['EndDate'] ?? null,
                     ]);
 
                     $log->update([
@@ -119,21 +105,41 @@ class SyncTimesheetsJob implements ShouldQueue
                     throw $exception;
                 }
 
-                $data = $nextResponse->json();
-                $items = Arr::get($data, 'value') ?? [];
+                $this->persistItems($connection, $response->items());
 
-                $this->persistItems($connection, $items);
+                $nextLink = Arr::get($response->toResponse()->json(), '@odata.nextLink');
 
-                $nextLink = Arr::get($data, '@odata.nextLink');
+                while ($nextLink) {
+                    try {
+                        $nextResponse = $manager->client()->request('GET', $nextLink);
+                    } catch (Throwable $exception) {
+                        Log::error('SyncTimesheetsJob failed on next page', [
+                            'connection_id' => $this->connectionId,
+                            'message' => $exception->getMessage(),
+                            'date' => $query['Date'] ?? null,
+                            'end_date' => $query['EndDate'] ?? null,
+                        ]);
+
+                        $log->update([
+                            'status' => 'failed',
+                            'message' => $exception->getMessage(),
+                            'finished_at' => now(),
+                        ]);
+
+                        throw $exception;
+                    }
+
+                    $data = $nextResponse->json();
+                    $items = Arr::get($data, 'value') ?? [];
+
+                    $this->persistItems($connection, $items);
+
+                    $nextLink = Arr::get($data, '@odata.nextLink');
+                }
             }
         }
 
-        $start = Carbon::parse($baseQuery['Date']);
-        $end = isset($baseQuery['EndDate'])
-            ? Carbon::parse($baseQuery['EndDate'])
-            : $start->copy();
-
-        $this->rebuildTimesheetSummaries($connection, $start, $end);
+        $this->rebuildTimesheetSummaries($connection, $rangeStart, $rangeEnd);
 
         $log->update([
             'status' => 'completed',
@@ -166,6 +172,8 @@ class SyncTimesheetsJob implements ShouldQueue
 
         $date = $this->normalizeDate($dateInput ?? Carbon::now()->subDay()->toDateString());
         $endDate = $endDateInput ? $this->normalizeDate($endDateInput, Carbon::parse($date)) : null;
+
+        $this->periodProvided = $periodInput !== null;
 
         $period = $periodInput
             ? ucfirst(strtolower((string) $periodInput))
@@ -353,6 +361,58 @@ class SyncTimesheetsJob implements ShouldQueue
         } catch (Throwable) {
             return ($fallback ?? Carbon::now()->subDay())->toDateString();
         }
+    }
+
+    /**
+     * @return array<int, array{0: Carbon, 1: Carbon}>
+     */
+    protected function chunkDateRange(Carbon $start, Carbon $end): array
+    {
+        $chunks = [];
+        $cursor = $start->copy();
+
+        while ($cursor->lte($end)) {
+            $chunkEnd = $cursor->copy()->addDays($this->maxChunkDays - 1);
+
+            if ($chunkEnd->gt($end)) {
+                $chunkEnd = $end->copy();
+            }
+
+            $chunks[] = [$cursor->copy(), $chunkEnd];
+
+            $cursor = $chunkEnd->copy()->addDay();
+        }
+
+        return $chunks;
+    }
+
+    protected function prepareChunkQuery(array $baseQuery, Carbon $chunkStart, Carbon $chunkEnd, ?array $personIds): array
+    {
+        $query = $baseQuery;
+
+        $query['Date'] = $chunkStart->toDateString();
+
+        if ($chunkStart->equalTo($chunkEnd)) {
+            unset($query['EndDate']);
+
+            if (! $this->periodProvided) {
+                $query['Period'] = 'Day';
+            }
+        } else {
+            $query['EndDate'] = $chunkEnd->toDateString();
+
+            if (! $this->periodProvided) {
+                $query['Period'] = 'Custom';
+            }
+        }
+
+        if ($personIds !== null) {
+            $query['PersonIds'] = $personIds;
+        } elseif (! array_key_exists('PersonIds', $baseQuery)) {
+            unset($query['PersonIds']);
+        }
+
+        return $query;
     }
 
     protected function storeTimesheetDay(
