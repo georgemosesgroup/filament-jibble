@@ -42,6 +42,8 @@ trait BuildsTimesheetSummaries
             ->forceDelete();
 
         $tenantColumn = TenantHelper::tenantColumn();
+        $timestamp = now();
+        $records = [];
 
         foreach ($rows as $row) {
             $tracked = (int) ($row->tracked_seconds ?? 0);
@@ -52,12 +54,11 @@ trait BuildsTimesheetSummaries
                 continue;
             }
 
-            JibbleTimesheetSummary::query()->updateOrCreate([
+            $records[] = [
                 'connection_id' => $connection->id,
                 'jibble_person_id' => $row->jibble_person_id,
                 'date' => $start,
                 'period' => 'Range',
-            ], [
                 $tenantColumn => $connection->getTenantKey(),
                 'person_id' => $row->person_id,
                 'tracked_seconds' => $tracked,
@@ -65,12 +66,32 @@ trait BuildsTimesheetSummaries
                 'regular_seconds' => $billable,
                 'overtime_seconds' => max(0, $tracked - $billable),
                 'daily_breakdown' => null,
-                'summary' => [
+                'summary' => json_encode([
                     'start_date' => $start,
                     'end_date' => $end,
                     'break_seconds' => $break,
-                ],
-            ]);
+                ]),
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
+        }
+
+        if (! empty($records)) {
+            JibbleTimesheetSummary::query()->upsert(
+                $records,
+                ['connection_id', 'period', 'date', 'jibble_person_id'],
+                [
+                    $tenantColumn,
+                    'person_id',
+                    'tracked_seconds',
+                    'payroll_seconds',
+                    'regular_seconds',
+                    'overtime_seconds',
+                    'daily_breakdown',
+                    'summary',
+                    'updated_at',
+                ]
+            );
         }
     }
 }
