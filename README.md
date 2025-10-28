@@ -34,7 +34,7 @@ A fresh Laravel 11 + Filament 4 application prepared to integrate the complete [
 | `JIBBLE_TIME_ATTENDANCE_BASE_URL` | Time attendance API host (default `https://time-attendance.prod.jibble.io/v1`). |
 | `JIBBLE_STORAGE_BASE_URL` | Storage API host used for fetching binary blobs (default `https://storage.prod.jibble.io/v1`). |
 | `JIBBLE_STORAGE_PUBLIC_BASE_URL` | Public CDN host for displaying stored images (default `https://storage.prod.jibble.io`). |
-   | `JIBBLE_PATH_PREFIX` | Path prefix appended to every request (default `/api/v1`). Set to an empty string if your token already targets a versioned host. |
+| `JIBBLE_PATH_PREFIX` | Optional path prefix appended to every request (for example `/api/v1`). Leave unset when your base URL already contains the version segment. |
    | `JIBBLE_API_TOKEN` | Personal access token or OAuth bearer token. |
 | `JIBBLE_ORGANIZATION_UUID` | Default organization scope injected into `{organization}` placeholders. Required for org-scoped endpoints (e.g., people, projects). |
 | `JIBBLE_CLIENT_ID` / `JIBBLE_CLIENT_SECRET` | Client credentials (API Key ID/Secret). If `JIBBLE_API_TOKEN` is empty, the app will automatically request a token using these values. |

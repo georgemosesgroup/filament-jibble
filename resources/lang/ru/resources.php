@@ -627,10 +627,11 @@ return [
             'legend_title' => 'Легенда',
             'statuses' => [
                 'missing' => 'Нет данных',
-                'off' => 'Выходной / Отсутствует',
-                'target' => 'В норме',
-                'extended' => 'Продлённый день',
-                'overtime' => 'Сверхурочно',
+                'off' => 'Выходной',
+                'target' => 'До 6 ч',
+                'extended' => '6–8 ч',
+                'overtime' => '8–10 ч',
+                'excessive' => '10+ ч',
             ],
             'tooltip' => [
                 'no_data' => 'Нет учтённого времени',

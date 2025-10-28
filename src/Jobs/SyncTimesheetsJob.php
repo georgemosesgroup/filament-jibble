@@ -170,8 +170,17 @@ class SyncTimesheetsJob implements ShouldQueue
         $endDateInput = $normalized['enddate'] ?? ($normalized['end_date'] ?? null);
         $periodInput = $normalized['period'] ?? null;
 
-        $date = $this->normalizeDate($dateInput ?? Carbon::now()->subDay()->toDateString());
-        $endDate = $endDateInput ? $this->normalizeDate($endDateInput, Carbon::parse($date)) : null;
+        $now = Carbon::now();
+        $defaultStart = $now->copy()->startOfMonth()->toDateString();
+        $date = $this->normalizeDate($dateInput ?? $defaultStart, Carbon::parse($defaultStart));
+
+        if ($endDateInput !== null) {
+            $endDate = $this->normalizeDate($endDateInput, Carbon::parse($date));
+        } elseif ($dateInput === null) {
+            $endDate = $this->normalizeDate($now->toDateString(), Carbon::parse($date));
+        } else {
+            $endDate = null;
+        }
 
         $this->periodProvided = $periodInput !== null;
 

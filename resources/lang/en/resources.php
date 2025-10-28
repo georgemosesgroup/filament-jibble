@@ -627,10 +627,11 @@ return [
             'legend_title' => 'Legend',
             'statuses' => [
                 'missing' => 'No data',
-                'off' => 'Off / Absent',
-                'target' => 'On target',
-                'extended' => 'Extended',
-                'overtime' => 'Overtime',
+                'off' => 'Off / Holiday',
+                'target' => '≤ 6h',
+                'extended' => '6–8h',
+                'overtime' => '8–10h',
+                'excessive' => '10h+',
             ],
             'tooltip' => [
                 'no_data' => 'No tracked time',

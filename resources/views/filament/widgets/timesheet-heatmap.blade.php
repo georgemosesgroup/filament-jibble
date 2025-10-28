@@ -82,7 +82,11 @@
                                         <span
                                             class="{{ $slot['classes'] ?? 'timesheet-slot' }}"
                                             title="{{ $slot['tooltip'] ?? 'No tooltip' }}"
-                                        ></span>
+                                        >
+                                            @if (! empty($slot['icon']))
+                                                <span class="{{ $slot['icon_classes'] ?? '' }}">{{ $slot['icon'] }}</span>
+                                            @endif
+                                        </span>
                                     </td>
                                 @endforeach
                             <td class="whitespace-nowrap pl-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -106,7 +110,11 @@
                     </span>
                     @foreach ($this->legend as $legendItem)
                         <span class="inline-flex items-center gap-2">
-                            <span class="{{ $legendItem['classes'] }}"></span>
+                            <span class="{{ $legendItem['classes'] }}">
+                                @if (! empty($legendItem['icon']))
+                                    <span class="{{ $legendItem['icon_classes'] ?? '' }}">{{ $legendItem['icon'] }}</span>
+                                @endif
+                            </span>
                             {{ $legendItem['label'] }}
                         </span>
                     @endforeach
