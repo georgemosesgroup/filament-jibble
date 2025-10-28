@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .timesheet-slot {
+        @apply block h-5 w-5 rounded-md;
+    }
+
+    .timesheet-slot--missing {
+        @apply bg-gray-200;
+    }
+
+    .timesheet-slot--off {
+        @apply bg-gray-300;
+    }
+
+    .timesheet-slot--target {
+        @apply bg-green-500;
+    }
+
+    .timesheet-slot--extended {
+        @apply bg-yellow-400;
+    }
+
+    .timesheet-slot--overtime {
+        @apply bg-red-500;
+    }
+}

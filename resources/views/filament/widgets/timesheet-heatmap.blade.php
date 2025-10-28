@@ -1,0 +1,162 @@
+@pushOnce('styles', 'timesheet-heatmap')
+    <style>
+        .fi-widget-timesheet-heatmap .timesheet-slot {
+            display: block;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 0.375rem;
+        }
+    </style>
+@endPushOnce
+
+@php
+    $tenant = filament()->getTenant();
+@endphp
+
+<x-filament::widget class="fi-widget-timesheet-heatmap">
+    <x-filament::card>
+        <div class="mb-4">
+            {{ $this->form }}
+        </div>
+
+        @if ($requiresTenant && ! $tenant)
+            <x-filament::empty-state
+                heading="{{ __('filament-jibble::resources.widgets.timesheet_heatmap.no_branch.heading') }}"
+                description="{{ __('filament-jibble::resources.widgets.timesheet_heatmap.no_branch.body') }}"
+                icon="heroicon-o-building-office"
+                class="mt-6"
+            />
+        @elseif (! $hasAnyPeople)
+            <x-filament::empty-state
+                heading="{{ __('filament-jibble::resources.widgets.timesheet_heatmap.empty.heading') }}"
+                description="{{ __('filament-jibble::resources.widgets.timesheet_heatmap.empty.body') }}"
+                icon="heroicon-o-chart-bar-square"
+                class="mt-6"
+            />
+        @elseif (empty($people))
+            <div class="flex flex-col items-center justify-center gap-2 py-12 text-center">
+                <x-filament::icon icon="heroicon-o-face-frown" class="h-6 w-6 text-gray-300 dark:text-gray-600" />
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('filament-jibble::resources.widgets.timesheet_heatmap.search_empty') }}
+                </span>
+            </div>
+        @else
+            <div class="mt-6 overflow-x-auto">
+                <table class="min-w-full border-separate text-sm" style="border-spacing: 0 12px;">
+                    <thead>
+                    <tr class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <th class="min-w-[220px] py-2 pr-4 text-left font-medium">
+                            {{ __('filament-jibble::resources.widgets.timesheet_heatmap.employee') }}
+                        </th>
+                        @foreach ($days as $day)
+                            <th class="w-8 text-center font-medium">
+                                <div class="text-[11px] text-gray-400 dark:text-gray-500">
+                                    {{ $day['day'] ?? '?' }}
+                                </div>
+                                <div class="mt-1 text-sm {{ ($day['is_today'] ?? false) ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-300' }}">
+                                    {{ $day['label'] ?? '?' }}
+                                </div>
+                            </th>
+                        @endforeach
+                        <th class="min-w-[90px] py-2 pl-4 text-right font-medium">
+                            {{ __('filament-jibble::resources.widgets.timesheet_heatmap.total') }}
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    @forelse ($people as $person)
+                        <tr class="align-middle" wire:key="timesheet-person-{{ $person['id'] ?? uniqid() }}">
+                            <td class="pr-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                        {{ $person['initials'] ?? '??' }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                            {{ $person['name'] ?? 'Unknown' }}
+                                        </div>
+                                        @if (! empty($person['email']))
+                                            <div class="truncate text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $person['email'] }}
+                                            </div>
+                                        @endif
+                                        @if (! empty($person['connection']))
+                                            <div class="truncate text-xs text-gray-400 dark:text-gray-500">
+                                                {{ $person['connection'] }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                                @foreach ($person['slots'] ?? [] as $slot)
+                                    <td class="py-2 text-center">
+                                        <span
+                                            class="{{ $slot['classes'] ?? 'timesheet-slot' }}"
+                                            style="{{ $slot['style'] ?? '' }}"
+                                            title="{{ $slot['tooltip'] ?? 'No tooltip' }}"
+                                        ></span>
+                                    </td>
+                                @endforeach
+                            <td class="pl-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                {{ $person['total_formatted'] ?? '—' }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="{{ count($days) + 2 }}" class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('filament-jibble::resources.widgets.timesheet_heatmap.search_empty') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @if (! empty($this->legend))
+                <div class="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <span class="font-semibold text-gray-600 dark:text-gray-300">
+                        {{ __('filament-jibble::resources.widgets.timesheet_heatmap.legend_title') }}:
+                    </span>
+                    @foreach ($this->legend as $legendItem)
+                        <span class="inline-flex items-center gap-2">
+                            <span class="{{ $legendItem['classes'] }}" style="{{ $legendItem['style'] ?? '' }}"></span>
+                            {{ $legendItem['label'] }}
+                        </span>
+                    @endforeach
+                </div>
+            @endif
+        @endif
+    </x-filament::card>
+
+</x-filament::widget>
+
+когда я убираю
+@once
+    <style>
+        .fi-widget-timesheet-heatmap .timesheet-slot {
+            display: block;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 0.375rem;
+        }
+
+        .fi-widget-timesheet-heatmap .timesheet-slot--missing {
+            background-color: #e5e7eb;
+        }
+
+        .fi-widget-timesheet-heatmap .timesheet-slot--off {
+            background-color: #d1d5db;
+        }
+
+        .fi-widget-timesheet-heatmap .timesheet-slot--target {
+            background-color: #22c55e;
+        }
+
+        .fi-widget-timesheet-heatmap .timesheet-slot--extended {
+            background-color: #facc15;
+        }
+
+        .fi-widget-timesheet-heatmap .timesheet-slot--overtime {
+            background-color: #ef4444;
+        }
+    </style>
+@endonce
