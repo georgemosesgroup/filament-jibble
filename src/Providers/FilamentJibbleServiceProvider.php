@@ -46,7 +46,7 @@ class FilamentJibbleServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'filament-jibble');
 
         $this->publishes([
-            __DIR__.'/../../resources/lang' => resource_path('lang/vendor/filament-jibble'),
+            __DIR__.'/../../resources/lang' => lang_path('vendor/filament-jibble'),
         ], 'filament-jibble-translations');
 
         Livewire::component(
