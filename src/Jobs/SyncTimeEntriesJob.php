@@ -7,6 +7,7 @@ use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimeEntry;
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -50,8 +51,11 @@ class SyncTimeEntriesJob implements ShouldQueue
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+        $tenantId = $connection->getTenantKey();
+
         $log = JibbleSyncLog::create([
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $tenantId,
             'connection_id' => $connection->id,
             'resource' => 'time_entries',
             'status' => 'running',
@@ -178,11 +182,13 @@ class SyncTimeEntriesJob implements ShouldQueue
             ? (int) $picture['size']
             : null;
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         JibbleTimeEntry::query()->updateOrCreate([
             'connection_id' => $connection->id,
             'jibble_entry_id' => $entryId,
         ], [
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'person_id' => $person?->id,
             'jibble_person_id' => $personJibbleId,
             'project_id' => $projectId,

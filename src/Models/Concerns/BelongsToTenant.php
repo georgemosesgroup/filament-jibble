@@ -10,7 +10,7 @@ trait BelongsToTenant
     {
         $tenantModel = $this->resolveTenantModelClass();
 
-        return $this->belongsTo($tenantModel, 'tenant_id');
+        return $this->belongsTo($tenantModel, $this->getTenantForeignKey());
     }
 
     protected function resolveTenantModelClass(): string
@@ -30,5 +30,32 @@ trait BelongsToTenant
         }
 
         return static::class;
+    }
+
+    public function getTenantForeignKey(): string
+    {
+        return (string) config('filament-jibble.tenant_foreign_key', 'tenant_id');
+    }
+
+    public function getTenantKey(): mixed
+    {
+        return $this->getAttribute($this->getTenantForeignKey());
+    }
+
+    public function setTenantKey(mixed $value): void
+    {
+        $this->setAttribute($this->getTenantForeignKey(), $value);
+    }
+
+    public function getFillable(): array
+    {
+        $fillable = parent::getFillable();
+        $key = $this->getTenantForeignKey();
+
+        if (! in_array($key, $fillable, true)) {
+            $fillable[] = $key;
+        }
+
+        return $fillable;
     }
 }

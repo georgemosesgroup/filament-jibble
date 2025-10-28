@@ -149,7 +149,7 @@ class TenantJibbleSettingsPage extends Page implements HasForms
                 'api_token' => $apiToken,
             ]);
 
-            $connection->tenant_id = $this->tenant()?->getKey();
+            $connection->setTenantKey($this->tenant()?->getKey());
 
             if ($connection->organization_uuid) {
                 $label = $this->resolveOrganizationLabel($connection, $connection->organization_uuid);
@@ -211,8 +211,10 @@ class TenantJibbleSettingsPage extends Page implements HasForms
             return null;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         return JibbleConnection::query()->firstOrNew([
-            'tenant_id' => $tenant->getKey(),
+            $tenantColumn => $tenant->getKey(),
         ], [
             'name' => 'primary',
         ]);

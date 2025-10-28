@@ -205,9 +205,10 @@ class JibbleLocationResource extends Resource
         $query = parent::getEloquentQuery()->with('connection');
 
         $tenant = TenantHelper::current();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where($tenantColumn, $tenant->getKey());
         }
 
         return $query;

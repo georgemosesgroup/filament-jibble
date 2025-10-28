@@ -3,6 +3,7 @@
 namespace Gpos\FilamentJibble\Models;
 
 use Gpos\FilamentJibble\Casts\EncryptedArray;
+use Gpos\FilamentJibble\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +17,7 @@ class JibbleConnection extends Model
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
+    use BelongsToTenant;
 
     protected $table = 'jibble_connections';
 
@@ -87,25 +89,6 @@ class JibbleConnection extends Model
     public function hasGroupFilter(): bool
     {
         return filled($this->getDefaultGroupId());
-    }
-
-    public function tenant(): BelongsTo
-    {
-        $tenantModel = config('filament-jibble.tenant_model', 'App\\Models\\Tenant');
-
-        if (is_string($tenantModel) && class_exists($tenantModel)) {
-            return $this->belongsTo($tenantModel, 'tenant_id');
-        }
-
-        $fallback = config('filament-jibble.user_model')
-            ?? config('auth.providers.users.model')
-            ?? 'App\\Models\\User';
-
-        if (is_string($fallback) && class_exists($fallback)) {
-            return $this->belongsTo($fallback, 'tenant_id');
-        }
-
-        return $this->belongsTo(static::class, 'tenant_id');
     }
 
     public function user(): BelongsTo

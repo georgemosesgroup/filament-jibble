@@ -13,7 +13,8 @@ class ManageJibbleConnections extends ManageRecords
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $tenant = TenantHelper::current();
-        $data['tenant_id'] = $tenant?->getKey();
+        $column = TenantHelper::tenantColumn();
+        $data[$column] = $tenant?->getKey();
 
         return $data;
     }
@@ -21,7 +22,8 @@ class ManageJibbleConnections extends ManageRecords
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $tenant = TenantHelper::current();
-        $data['tenant_id'] ??= $tenant?->getKey();
+        $column = TenantHelper::tenantColumn();
+        $data[$column] ??= $tenant?->getKey();
 
         return $data;
     }

@@ -148,9 +148,10 @@ class JibbleTimeEntryResource extends Resource
     {
         $tenant = TenantHelper::current();
         $people = JibblePerson::query();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $people->where('tenant_id', $tenant->getKey());
+            $people->where($tenantColumn, $tenant->getKey());
         }
 
         return $people
@@ -163,9 +164,10 @@ class JibbleTimeEntryResource extends Resource
     {
         $tenant = TenantHelper::current();
         $locations = JibbleLocation::query();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $locations->where('tenant_id', $tenant->getKey());
+            $locations->where($tenantColumn, $tenant->getKey());
         }
 
         return $locations

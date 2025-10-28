@@ -16,6 +16,6 @@ trait HasJibbleConnections
     {
         return property_exists($this, 'jibbleConnectionsForeignKey')
             ? $this->jibbleConnectionsForeignKey
-            : 'tenant_id';
+            : (string) config('filament-jibble.tenant_foreign_key', 'tenant_id');
     }
 }

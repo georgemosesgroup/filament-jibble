@@ -124,9 +124,10 @@ class JibbleTimesheetSummaryResource extends Resource
             ->orderByDesc('date');
 
         $tenant = TenantHelper::current();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where($tenantColumn, $tenant->getKey());
         }
 
         return $query;
@@ -223,9 +224,10 @@ class JibbleTimesheetSummaryResource extends Resource
     {
         $tenant = TenantHelper::current();
         $people = JibblePerson::query();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $people->where('tenant_id', $tenant->getKey());
+            $people->where($tenantColumn, $tenant->getKey());
         }
 
         return $people

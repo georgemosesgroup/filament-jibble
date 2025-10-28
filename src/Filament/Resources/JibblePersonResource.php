@@ -113,9 +113,10 @@ class JibblePersonResource extends Resource
     {
         $query = parent::getEloquentQuery();
         $tenant = TenantHelper::current();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where($tenantColumn, $tenant->getKey());
         }
 
         return $query;

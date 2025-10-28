@@ -25,4 +25,9 @@ class TenantHelper
 
         return null;
     }
+
+    public static function tenantColumn(): string
+    {
+        return (string) config('filament-jibble.tenant_foreign_key', 'tenant_id');
+    }
 }

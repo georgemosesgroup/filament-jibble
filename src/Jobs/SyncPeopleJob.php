@@ -7,6 +7,7 @@ use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Services\Jibble\JibbleManager;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -40,8 +41,10 @@ class SyncPeopleJob implements ShouldQueue
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $log = JibbleSyncLog::create([
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'connection_id' => $connection->id,
             'resource' => 'people',
             'status' => 'running',
@@ -125,6 +128,8 @@ class SyncPeopleJob implements ShouldQueue
 
     private function storePerson(JibbleConnection $connection, array $payload): bool
     {
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $jibbleId = Arr::get($payload, 'id');
 
         if (! $jibbleId) {
@@ -145,7 +150,7 @@ class SyncPeopleJob implements ShouldQueue
                 'jibble_id' => $jibbleId,
             ],
             [
-                'tenant_id' => $connection->tenant_id,
+                $tenantColumn => $connection->getTenantKey(),
                 'email' => Arr::get($payload, 'email'),
                 'first_name' => Arr::get($payload, 'firstName'),
                 'last_name' => Arr::get($payload, 'lastName'),

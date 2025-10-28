@@ -5,6 +5,7 @@ namespace Gpos\FilamentJibble\Jobs;
 use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
 use Gpos\FilamentJibble\Support\BuildsTimesheetSummaries;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -40,8 +41,10 @@ class SyncTimesheetSummaryJob implements ShouldQueue
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $log = JibbleSyncLog::create([
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'connection_id' => $connection->id,
             'resource' => 'timesheets_summary',
             'status' => 'running',
@@ -86,4 +89,3 @@ class SyncTimesheetSummaryJob implements ShouldQueue
         return $query;
     }
 }
-

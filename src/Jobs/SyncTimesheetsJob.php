@@ -8,6 +8,7 @@ use Gpos\FilamentJibble\Models\JibbleSyncLog;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Support\BuildsTimesheetSummaries;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Carbon\CarbonInterval;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -54,8 +55,10 @@ class SyncTimesheetsJob implements ShouldQueue
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $log = JibbleSyncLog::create([
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'connection_id' => $connection->id,
             'resource' => 'timesheets',
             'status' => 'running',
@@ -360,6 +363,8 @@ class SyncTimesheetsJob implements ShouldQueue
         array $summary,
         ?array $daily,
     ): void {
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $date = Arr::get($daily, 'date') ?? Arr::get($payload, 'date');
 
         if (! $date) {
@@ -412,7 +417,7 @@ class SyncTimesheetsJob implements ShouldQueue
             'connection_id' => $connection->id,
             'jibble_timesheet_id' => $timesheetId,
         ], [
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'person_id' => $person?->id,
             'jibble_person_id' => $personJibbleId,
             'date' => $date,

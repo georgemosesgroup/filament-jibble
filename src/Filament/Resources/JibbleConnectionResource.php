@@ -76,6 +76,8 @@ class JibbleConnectionResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
+        $tenantColumn = TenantHelper::tenantColumn();
+
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -94,7 +96,7 @@ class JibbleConnectionResource extends Resource
                     ->since(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('tenant_id')
+                Tables\Filters\SelectFilter::make($tenantColumn)
                     ->label(__('filament-jibble::resources.connections.table.filters.tenant.label'))
                     ->options(fn () => static::tenantOptions())
                     ->searchable()
@@ -143,9 +145,10 @@ class JibbleConnectionResource extends Resource
     {
         $query = parent::getEloquentQuery();
         $tenant = TenantHelper::current();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where($tenantColumn, $tenant->getKey());
         }
 
         return $query;

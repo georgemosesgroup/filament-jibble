@@ -5,6 +5,7 @@ namespace Gpos\FilamentJibble\Support;
 use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Models\JibbleTimesheetSummary;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -39,6 +40,8 @@ trait BuildsTimesheetSummaries
             ->whereDate('date', $start)
             ->delete();
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         foreach ($rows as $row) {
             $tracked = (int) ($row->tracked_seconds ?? 0);
             $billable = (int) ($row->billable_seconds ?? 0);
@@ -54,7 +57,7 @@ trait BuildsTimesheetSummaries
                 'date' => $start,
                 'period' => 'Range',
             ], [
-                'tenant_id' => $connection->tenant_id,
+                $tenantColumn => $connection->getTenantKey(),
                 'person_id' => $row->person_id,
                 'tracked_seconds' => $tracked,
                 'payroll_seconds' => $billable,

@@ -74,6 +74,8 @@ class TimesheetHeatmap extends Widget implements HasForms
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         try {
             $start = Carbon::createFromFormat('Y-m', $this->month, config('app.timezone'))
                 ->startOfMonth()
@@ -89,7 +91,7 @@ class TimesheetHeatmap extends Widget implements HasForms
         $this->days = $this->generateDayGrid($start, $end);
 
         $personQuery = JibblePerson::query()
-            ->when($tenant, fn ($query) => $query->where('tenant_id', $tenant->getKey()))
+            ->when($tenant, fn ($query) use ($tenantColumn, $tenant) => $query->where($tenantColumn, $tenant->getKey()))
             ->with(['connection', 'timesheets' => function ($query) use ($start, $end) {
                 $query
                     ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
@@ -420,8 +422,10 @@ class TimesheetHeatmap extends Widget implements HasForms
             return [$current => $current];
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where($tenantColumn, $tenant->getKey());
         }
 
         $earliestDate = $query->min('date');

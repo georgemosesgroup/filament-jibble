@@ -174,7 +174,7 @@ class JibbleProfileSettingsPage extends Page implements HasForms
                 'client_secret',
                 'api_token',
             ]));
-            $connection->tenant_id = null;
+            $connection->setTenantKey(null);
             $connection->user_id = $this->user()?->getAuthIdentifier();
             if (blank($data['api_token']) && (! blank($data['client_id']) || ! blank($data['client_secret']))) {
                 $connection->api_token = null;

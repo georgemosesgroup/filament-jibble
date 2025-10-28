@@ -121,9 +121,10 @@ class JibbleTimesheetResource extends Resource
     {
         $tenant = TenantHelper::current();
         $people = JibblePerson::query();
+        $tenantColumn = TenantHelper::tenantColumn();
 
         if ($tenant) {
-            $people->where('tenant_id', $tenant->getKey());
+            $people->where($tenantColumn, $tenant->getKey());
         }
 
         return $people

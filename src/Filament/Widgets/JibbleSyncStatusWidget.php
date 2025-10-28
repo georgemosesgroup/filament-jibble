@@ -3,6 +3,7 @@
 namespace Gpos\FilamentJibble\Filament\Widgets;
 
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -19,7 +20,7 @@ class JibbleSyncStatusWidget extends StatsOverviewWidget
             ->latest('created_at');
 
         if ($tenant) {
-            $query->where('tenant_id', $tenant->getKey());
+            $query->where(TenantHelper::tenantColumn(), $tenant->getKey());
         }
 
         $latest = $query->limit(3)->get();

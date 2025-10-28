@@ -57,6 +57,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant Foreign Key Column
+    |--------------------------------------------------------------------------
+    |
+    | Column name used to reference the tenant on all package tables. Defaults
+    | to "tenant_id". Set FILAMENT_JIBBLE_TENANT_FOREIGN_KEY (e.g. "branch_id")
+    | before running the migrations to match your schema.
+    |
+    */
+    'tenant_foreign_key' => env('FILAMENT_JIBBLE_TENANT_FOREIGN_KEY', 'tenant_id'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Models
     |--------------------------------------------------------------------------
     |

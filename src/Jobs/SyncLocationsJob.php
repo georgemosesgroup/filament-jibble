@@ -6,6 +6,7 @@ use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibbleLocation;
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
+use Gpos\FilamentJibble\Support\TenantHelper;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -48,8 +49,10 @@ class SyncLocationsJob implements ShouldQueue
             return;
         }
 
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $log = JibbleSyncLog::create([
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'connection_id' => $connection->id,
             'resource' => 'locations',
             'status' => 'running',
@@ -122,6 +125,8 @@ class SyncLocationsJob implements ShouldQueue
 
     protected function storeLocation(JibbleConnection $connection, array $payload): void
     {
+        $tenantColumn = TenantHelper::tenantColumn();
+
         $locationId = Arr::get($payload, 'id');
 
         if (! $locationId) {
@@ -140,7 +145,7 @@ class SyncLocationsJob implements ShouldQueue
             'connection_id' => $connection->id,
             'jibble_location_id' => $locationId,
         ], [
-            'tenant_id' => $connection->tenant_id,
+            $tenantColumn => $connection->getTenantKey(),
             'name' => Arr::get($payload, 'name'),
             'code' => Arr::get($payload, 'code'),
             'address' => Arr::get($payload, 'address'),
@@ -171,4 +176,3 @@ class SyncLocationsJob implements ShouldQueue
         }
     }
 }
-
