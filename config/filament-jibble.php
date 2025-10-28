@@ -45,6 +45,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Tenant Relationship Alias
+    |--------------------------------------------------------------------------
+    |
+    | If your Filament panel uses a different relationship name than "tenant"
+    | (for example "branch" or "company"), configure it here so the package
+    | can register the same relationship on its models automatically.
+    |
+    */
+    'tenant_relationship' => env('FILAMENT_JIBBLE_TENANT_RELATIONSHIP', 'tenant'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Models
     |--------------------------------------------------------------------------
     |

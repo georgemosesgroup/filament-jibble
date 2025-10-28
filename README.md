@@ -122,6 +122,8 @@ A tenant registration page and profile editor are included when tenancy is activ
 
 If you use a custom user class, set `FILAMENT_JIBBLE_USER_MODEL` (or `filament-jibble.user_model`) so the package can resolve the correct relation.
 
+If your panel uses a different tenant relationship name (for example `branch`), set `FILAMENT_JIBBLE_TENANT_RELATIONSHIP=branch` so the package registers the same relationship on its models automatically.
+
 ## Next Steps
 
 1. Map any remaining endpoints into `config/jibble.php` so they can be addressed by name.

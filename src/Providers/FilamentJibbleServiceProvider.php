@@ -5,6 +5,13 @@ namespace Gpos\FilamentJibble\Providers;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
 use Gpos\FilamentJibble\Support\JibbleConnectionResolver;
 use Gpos\FilamentJibble\Filament\Widgets\TimesheetHeatmap;
+use Gpos\FilamentJibble\Models\JibbleConnection;
+use Gpos\FilamentJibble\Models\JibbleLocation;
+use Gpos\FilamentJibble\Models\JibblePerson;
+use Gpos\FilamentJibble\Models\JibbleSyncLog;
+use Gpos\FilamentJibble\Models\JibbleTimeEntry;
+use Gpos\FilamentJibble\Models\JibbleTimesheet;
+use Gpos\FilamentJibble\Models\JibbleTimesheetSummary;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
@@ -49,6 +56,8 @@ class FilamentJibbleServiceProvider extends ServiceProvider
             __DIR__.'/../../resources/lang' => lang_path('vendor/filament-jibble'),
         ], 'filament-jibble-translations');
 
+        $this->registerTenantRelationshipAlias();
+
         Livewire::component(
             'gpos.filament-jibble.filament.widgets.timesheet-heatmap',
             TimesheetHeatmap::class,
@@ -72,5 +81,28 @@ class FilamentJibbleServiceProvider extends ServiceProvider
                 $schedule->command('jibble:sync --resource='.$resource)->cron($expression);
             }
         });
+    }
+
+    protected function registerTenantRelationshipAlias(): void
+    {
+        $relationship = (string) (config('filament-jibble.tenant_relationship', 'tenant'));
+
+        if ($relationship === 'tenant') {
+            return;
+        }
+
+        $models = [
+            JibbleConnection::class,
+            JibbleLocation::class,
+            JibblePerson::class,
+            JibbleSyncLog::class,
+            JibbleTimeEntry::class,
+            JibbleTimesheet::class,
+            JibbleTimesheetSummary::class,
+        ];
+
+        foreach ($models as $model) {
+            $model::resolveRelationUsing($relationship, static fn ($model) => $model->tenant());
+        }
     }
 }
