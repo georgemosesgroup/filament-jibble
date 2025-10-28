@@ -91,7 +91,7 @@ class TimesheetHeatmap extends Widget implements HasForms
         $this->days = $this->generateDayGrid($start, $end);
 
         $personQuery = JibblePerson::query()
-            ->when($tenant, fn ($query) use ($tenantColumn, $tenant) => $query->where($tenantColumn, $tenant->getKey()))
+            ->when($tenant, fn ($query) => $query->where($tenantColumn, $tenant->getKey()))
             ->with(['connection', 'timesheets' => function ($query) use ($start, $end) {
                 $query
                     ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
