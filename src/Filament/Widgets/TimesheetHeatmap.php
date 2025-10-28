@@ -208,12 +208,12 @@ class TimesheetHeatmap extends Widget implements HasForms
 
         return [
             'status' => $status,
-            'classes' => trim('timesheet-slot flex h-5 w-5 items-center justify-center rounded-md transition-colors duration-200 '.$styles['classes']),
+            'classes' => $styles['slot_classes'],
             'style' => '',
             'tooltip' => $this->buildTooltip($styles['label'], $minutes, $date),
             'minutes_formatted' => $this->formatMinutes($minutes),
             'icon' => $styles['icon'] ?? null,
-            'icon_classes' => $styles['icon_classes'] ?? '',
+            'icon_classes' => $styles['slot_icon_classes'] ?? '',
         ];
     }
 
@@ -284,29 +284,36 @@ class TimesheetHeatmap extends Widget implements HasForms
     {
         return [
             'missing' => [
-                'classes' => 'bg-gray-200 ring-1 ring-inset ring-white/80 text-transparent dark:bg-gray-700/70 dark:ring-gray-900/40',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--missing',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--missing',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.missing'),
             ],
             'off' => [
-                'classes' => 'bg-slate-200 ring-1 ring-inset ring-slate-300 text-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:ring-slate-500',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--off',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--off',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.off'),
                 'icon' => '×',
-                'icon_classes' => 'text-[10px] font-bold leading-none',
+                'slot_icon_classes' => 'text-[10px] font-bold leading-none',
+                'legend_icon_classes' => 'text-[7px] font-bold leading-none',
             ],
             'target' => [
-                'classes' => 'bg-emerald-500 text-white ring-1 ring-inset ring-emerald-300/60 dark:bg-emerald-400',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--target',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--target',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.target'),
             ],
             'extended' => [
-                'classes' => 'bg-amber-400 text-amber-950 ring-1 ring-inset ring-amber-200/70 dark:bg-amber-400 dark:text-amber-950',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--extended',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--extended',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.extended'),
             ],
             'overtime' => [
-                'classes' => 'bg-rose-500 text-white ring-1 ring-inset ring-rose-300/70 dark:bg-rose-500',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--overtime',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--overtime',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.overtime'),
             ],
             'excessive' => [
-                'classes' => 'bg-rose-900 text-white ring-1 ring-inset ring-rose-700/70 dark:bg-rose-900',
+                'slot_classes' => 'fi-timesheet-slot fi-timesheet-slot--excessive',
+                'legend_classes' => 'fi-timesheet-slot fi-timesheet-slot--legend fi-timesheet-slot--excessive',
                 'label' => __('filament-jibble::resources.widgets.timesheet_heatmap.statuses.excessive'),
             ],
         ];
@@ -323,11 +330,11 @@ class TimesheetHeatmap extends Widget implements HasForms
         return collect($order)
             ->filter(fn(string $key) => isset($styles[$key]))
             ->map(fn(string $key) => [
-                'classes' => trim('timesheet-slot flex h-3 w-3 items-center justify-center rounded-sm '.$styles[$key]['classes']),
+                'classes' => $styles[$key]['legend_classes'],
                 'style' => '',
                 'label' => $styles[$key]['label'],
                 'icon' => $styles[$key]['icon'] ?? null,
-                'icon_classes' => $styles[$key]['icon_classes'] ?? 'text-[8px] font-bold leading-none',
+                'icon_classes' => $styles[$key]['legend_icon_classes'] ?? 'text-[7px] font-bold leading-none',
             ])
             ->values()
             ->all();

@@ -33,7 +33,9 @@ class SyncTimesheetSummaryJob implements ShouldQueue
     public function handle(): void
     {
         /** @var JibbleConnection|null $connection */
-        $connection = JibbleConnection::query()->find($this->connectionId);
+        $connection = JibbleConnection::query()
+            ->with('tenant')
+            ->find($this->connectionId);
 
         if (! $connection) {
             Log::warning('SyncTimesheetSummaryJob: connection not found', ['connection_id' => $this->connectionId]);
@@ -41,42 +43,44 @@ class SyncTimesheetSummaryJob implements ShouldQueue
             return;
         }
 
-        $tenantColumn = TenantHelper::tenantColumn();
+        TenantHelper::forTenant($connection->tenant, function () use ($connection): void {
+            $tenantColumn = TenantHelper::tenantColumn();
 
-        $log = JibbleSyncLog::create([
-            $tenantColumn => $connection->getTenantKey(),
-            'connection_id' => $connection->id,
-            'resource' => 'timesheets_summary',
-            'status' => 'running',
-            'started_at' => now(),
-        ]);
-
-        try {
-            $query = $this->buildQuery();
-
-            $start = Carbon::parse($query['date']);
-            $end = isset($query['endDate']) ? Carbon::parse($query['endDate']) : $start->copy();
-
-            $this->rebuildTimesheetSummaries($connection, $start, $end);
-
-            $log->update([
-                'status' => 'completed',
-                'finished_at' => now(),
-            ]);
-        } catch (Throwable $exception) {
-            Log::error('SyncTimesheetSummaryJob failed', [
-                'connection_id' => $this->connectionId,
-                'message' => $exception->getMessage(),
+            $log = JibbleSyncLog::create([
+                $tenantColumn => $connection->getTenantKey(),
+                'connection_id' => $connection->id,
+                'resource' => 'timesheets_summary',
+                'status' => 'running',
+                'started_at' => now(),
             ]);
 
-            $log->update([
-                'status' => 'failed',
-                'message' => $exception->getMessage(),
-                'finished_at' => now(),
-            ]);
+            try {
+                $query = $this->buildQuery();
 
-            throw $exception;
-        }
+                $start = Carbon::parse($query['date']);
+                $end = isset($query['endDate']) ? Carbon::parse($query['endDate']) : $start->copy();
+
+                $this->rebuildTimesheetSummaries($connection, $start, $end);
+
+                $log->update([
+                    'status' => 'completed',
+                    'finished_at' => now(),
+                ]);
+            } catch (Throwable $exception) {
+                Log::error('SyncTimesheetSummaryJob failed', [
+                    'connection_id' => $this->connectionId,
+                    'message' => $exception->getMessage(),
+                ]);
+
+                $log->update([
+                    'status' => 'failed',
+                    'message' => $exception->getMessage(),
+                    'finished_at' => now(),
+                ]);
+
+                throw $exception;
+            }
+        });
     }
 
     protected function buildQuery(): array

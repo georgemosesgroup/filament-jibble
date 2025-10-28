@@ -3,27 +3,35 @@
 @tailwind utilities;
 
 @layer components {
-    .timesheet-slot {
-        @apply block h-5 w-5 rounded-md;
+    .fi-timesheet-slot {
+        @apply flex h-5 w-5 items-center justify-center rounded-md transition-colors duration-200;
     }
 
-    .timesheet-slot--missing {
-        @apply bg-gray-200;
+    .fi-timesheet-slot--legend {
+        @apply h-3 w-3 text-[8px];
     }
 
-    .timesheet-slot--off {
-        @apply bg-gray-300;
+    .fi-timesheet-slot--missing {
+        @apply bg-gray-200 text-transparent ring-1 ring-inset ring-white/80 dark:bg-gray-700/70 dark:ring-gray-900/40;
     }
 
-    .timesheet-slot--target {
-        @apply bg-green-500;
+    .fi-timesheet-slot--off {
+        @apply bg-slate-200 text-slate-600 ring-1 ring-inset ring-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:ring-slate-500;
     }
 
-    .timesheet-slot--extended {
-        @apply bg-yellow-400;
+    .fi-timesheet-slot--target {
+        @apply bg-emerald-500 text-white ring-1 ring-inset ring-emerald-300/60 dark:bg-emerald-400;
     }
 
-    .timesheet-slot--overtime {
-        @apply bg-red-500;
+    .fi-timesheet-slot--extended {
+        @apply bg-amber-400 text-amber-950 ring-1 ring-inset ring-amber-200/70;
+    }
+
+    .fi-timesheet-slot--overtime {
+        @apply bg-rose-500 text-white ring-1 ring-inset ring-rose-300/70 dark:bg-rose-500;
+    }
+
+    .fi-timesheet-slot--excessive {
+        @apply bg-rose-900 text-white ring-1 ring-inset ring-rose-700/70 dark:bg-rose-900;
     }
 }
