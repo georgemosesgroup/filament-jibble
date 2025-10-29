@@ -210,6 +210,11 @@ class JibbleTimeEntryResource extends Resource
         return __('filament-jibble::resources.time_entries.navigation_label');
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('filament-jibble::resources.navigation.groups.integrations');

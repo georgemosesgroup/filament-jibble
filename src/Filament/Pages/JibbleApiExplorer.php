@@ -398,6 +398,11 @@ class JibbleApiExplorer extends Page implements HasForms
         return __('filament-jibble::resources.pages.api_explorer.navigation_label');
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('filament-jibble::resources.navigation.groups.integrations');

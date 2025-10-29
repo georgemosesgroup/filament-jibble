@@ -129,6 +129,11 @@ class JibbleSyncLogResource extends Resource
         return __('filament-jibble::resources.sync_logs.navigation_label');
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('filament-jibble::resources.navigation.groups.integrations');

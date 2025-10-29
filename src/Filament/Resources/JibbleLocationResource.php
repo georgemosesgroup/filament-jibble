@@ -230,6 +230,11 @@ class JibbleLocationResource extends Resource
         return __('filament-jibble::resources.locations.navigation_label');
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('filament-jibble::resources.navigation.groups.integrations');
