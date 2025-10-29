@@ -91,4 +91,16 @@ return [
     */
     'user_model' => env('FILAMENT_JIBBLE_USER_MODEL', config('auth.providers.users.model', 'App\\Models\\User')),
     'tenant_model' => env('FILAMENT_JIBBLE_TENANT_MODEL', 'App\\Models\\Tenant'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Policy Namespace
+    |--------------------------------------------------------------------------
+    |
+    | When set, the package will automatically register policies for its models
+    | using the provided namespace (for example "App\\Policies"). Leave null if
+    | you prefer to handle policy registration manually.
+    |
+    */
+    'policy_namespace' => env('FILAMENT_JIBBLE_POLICY_NAMESPACE', 'App\\Policies'),
 ];

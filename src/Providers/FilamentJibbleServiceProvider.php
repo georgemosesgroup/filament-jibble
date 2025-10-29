@@ -19,6 +19,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
@@ -77,6 +78,7 @@ class FilamentJibbleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->registerPolicies();
         $this->publishes([
             __DIR__.'/../../config/filament-jibble.php' => config_path('filament-jibble.php'),
         ], 'filament-jibble-config');
@@ -149,5 +151,34 @@ class FilamentJibbleServiceProvider extends ServiceProvider
         $config = config('jibble', []);
 
         return is_array($config) ? $config : [];
+    }
+
+    protected function registerPolicies(): void
+    {
+        $namespace = trim((string) config('filament-jibble.policy_namespace', ''), '\\');
+
+        if ($namespace === '') {
+            return;
+        }
+
+        $models = [
+            JibbleConnection::class,
+            JibbleLocation::class,
+            JibblePerson::class,
+            JibbleSyncLog::class,
+            JibbleTimeEntry::class,
+            JibbleTimesheet::class,
+            JibbleTimesheetSummary::class,
+        ];
+
+        foreach ($models as $model) {
+            $policy = $namespace.'\\'.class_basename($model).'Policy';
+
+            if (! class_exists($policy)) {
+                continue;
+            }
+
+            Gate::policy($model, $policy);
+        }
     }
 }
