@@ -5,6 +5,7 @@ namespace Gpos\FilamentJibble\Filament\Resources;
 use Gpos\FilamentJibble\Filament\Resources\JibblePersonResource\Pages;
 use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibblePerson;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\Collection;
 
 class JibblePersonResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibblePerson::class;
 
     protected static string|UnitEnum|null $navigationGroup = null;
@@ -154,11 +157,6 @@ class JibblePersonResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.people.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string

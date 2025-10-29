@@ -7,6 +7,7 @@ use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimesheetSummary;
 use Gpos\FilamentJibble\Support\TenantHelper;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use Carbon\CarbonInterval;
 use BackedEnum;
 use Filament\Forms;
@@ -21,6 +22,8 @@ use Filament\Tables\Enums\FiltersLayout;
 
 class JibbleTimesheetSummaryResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibbleTimesheetSummary::class;
 
     protected static string|UnitEnum|null $navigationGroup = null;
@@ -271,11 +274,6 @@ class JibbleTimesheetSummaryResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.timesheet_summaries.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string

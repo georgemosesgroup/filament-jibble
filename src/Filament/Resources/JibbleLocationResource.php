@@ -6,6 +6,7 @@ use Gpos\FilamentJibble\Filament\Resources\JibbleLocationResource\Pages;
 use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibbleLocation;
 use Gpos\FilamentJibble\Support\TenantHelper;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
@@ -27,6 +28,8 @@ use Filament\Tables\Enums\FiltersLayout;
 
 class JibbleLocationResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibbleLocation::class;
 
     protected static string|UnitEnum|null $navigationGroup = null;
@@ -228,11 +231,6 @@ class JibbleLocationResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.locations.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string

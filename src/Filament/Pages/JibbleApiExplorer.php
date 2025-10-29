@@ -8,6 +8,7 @@ use Gpos\FilamentJibble\Services\Jibble\JibbleManager;
 use Gpos\FilamentJibble\Services\Jibble\JibblePaginatedResponse;
 use Gpos\FilamentJibble\Services\Jibble\JibbleResponse;
 use Gpos\FilamentJibble\Support\JibbleConnectionFactory;
+use Gpos\FilamentJibble\Filament\Concerns\HidesPageNavigationWhenUnauthorized;
 use BackedEnum;
 use Carbon\Carbon;
 use Gpos\FilamentJibble\Support\TenantHelper;
@@ -27,7 +28,7 @@ use UnitEnum;
 
 class JibbleApiExplorer extends Page implements HasForms
 {
-    use InteractsWithForms;
+    use InteractsWithForms, HidesPageNavigationWhenUnauthorized;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar-square';
 
@@ -396,11 +397,6 @@ class JibbleApiExplorer extends Page implements HasForms
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.pages.api_explorer.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canAccess();
     }
 
     public static function getNavigationGroup(): ?string

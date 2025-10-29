@@ -8,6 +8,7 @@ use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleLocation;
 use Gpos\FilamentJibble\Support\TenantHelper;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use Filament\Forms;
@@ -21,6 +22,8 @@ use Filament\Tables\Enums\FiltersLayout;
 
 class JibbleTimeEntryResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibbleTimeEntry::class;
 
     protected static ?string $navigationLabel = null;
@@ -208,11 +211,6 @@ class JibbleTimeEntryResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.time_entries.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string

@@ -8,6 +8,7 @@ use Gpos\FilamentJibble\Jobs\SyncLocationsJob;
 use Gpos\FilamentJibble\Jobs\SyncPeopleJob;
 use Gpos\FilamentJibble\Jobs\SyncTimeEntriesJob;
 use Gpos\FilamentJibble\Jobs\SyncTimesheetsJob;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use BackedEnum;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -30,6 +31,8 @@ use UnitEnum;
 
 class JibbleConnectionResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibbleConnection::class;
 
     protected static string|UnitEnum|null $navigationGroup = null;
@@ -225,11 +228,6 @@ class JibbleConnectionResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.connections.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string

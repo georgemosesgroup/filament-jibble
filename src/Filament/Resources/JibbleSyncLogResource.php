@@ -4,6 +4,7 @@ namespace Gpos\FilamentJibble\Filament\Resources;
 
 use Gpos\FilamentJibble\Filament\Resources\JibbleSyncLogResource\Pages;
 use Gpos\FilamentJibble\Models\JibbleSyncLog;
+use Gpos\FilamentJibble\Filament\Concerns\HidesResourceNavigationWhenUnauthorized;
 use BackedEnum;
 use Filament\Actions\DeleteBulkAction;
 use Gpos\FilamentJibble\Support\TenantHelper;
@@ -19,6 +20,8 @@ use Filament\Tables\Enums\FiltersLayout;
 
 class JibbleSyncLogResource extends Resource
 {
+    use HidesResourceNavigationWhenUnauthorized;
+
     protected static ?string $model = JibbleSyncLog::class;
 
     protected static string|UnitEnum|null $navigationGroup = null;
@@ -127,11 +130,6 @@ class JibbleSyncLogResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('filament-jibble::resources.sync_logs.navigation_label');
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canViewAny();
     }
 
     public static function getNavigationGroup(): ?string
