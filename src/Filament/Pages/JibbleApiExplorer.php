@@ -16,6 +16,7 @@ use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Filament\Facades\Filament;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Utilities\Get;
@@ -399,9 +400,43 @@ class JibbleApiExplorer extends Page implements HasForms
         return __('filament-jibble::resources.pages.api_explorer.navigation_label');
     }
 
+    public static function canAccess(): bool
+    {
+        if (! parent::canAccess()) {
+            return false;
+        }
+
+        $permission = static::requiredPermission();
+
+        if ($permission === null) {
+            return true;
+        }
+
+        $user = Filament::auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->can($permission);
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return __('filament-jibble::resources.navigation.groups.integrations');
+    }
+
+    protected static function requiredPermission(): ?string
+    {
+        $permission = config('filament-jibble.page_permissions.jibble_api_explorer', 'View:JibbleApiExplorer');
+
+        if (! is_string($permission)) {
+            return null;
+        }
+
+        $permission = trim($permission);
+
+        return $permission === '' ? null : $permission;
     }
 
     private function defaultConnection(): ?JibbleConnection

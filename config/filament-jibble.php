@@ -103,4 +103,19 @@ return [
     |
     */
     'policy_namespace' => env('FILAMENT_JIBBLE_POLICY_NAMESPACE', 'App\\Policies'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Page Permissions
+    |--------------------------------------------------------------------------
+    |
+    | Map Filament pages provided by the package to permission names. Set a
+    | value to null or an empty string to disable the check. Adjust the names
+    | to match your authorization scheme (e.g. Filament Shield or custom
+    | Spatie Permission abilities).
+    |
+    */
+    'page_permissions' => [
+        'jibble_api_explorer' => env('FILAMENT_JIBBLE_PAGE_PERMISSION_API_EXPLORER', 'View:JibbleApiExplorer'),
+    ],
 ];
