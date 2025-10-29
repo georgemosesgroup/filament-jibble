@@ -24,6 +24,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Bus;
 use UnitEnum;
 
@@ -127,10 +128,25 @@ class JibbleConnectionResource extends Resource
                     ->icon('heroicon-o-arrow-path')
                     ->requiresConfirmation()
                     ->action(fn (JibbleConnection $record) => static::dispatchSync($record)),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->modalHeading(__('filament-jibble::resources.connections.table.actions.delete.heading'))
+                    ->modalDescription(__('filament-jibble::resources.connections.table.actions.delete.description'))
+                    ->modalSubmitActionLabel(__('filament-jibble::resources.connections.table.actions.delete.confirm'))
+                    ->modalCancelActionLabel(__('filament-jibble::resources.connections.table.actions.delete.cancel'))
+                    ->color('danger')
+                    ->using(fn (JibbleConnection $record) => $record->deleteWithData()),
             ])
             ->bulkActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->modalHeading(__('filament-jibble::resources.connections.table.actions.delete_bulk.heading'))
+                    ->modalDescription(__('filament-jibble::resources.connections.table.actions.delete_bulk.description'))
+                    ->modalSubmitActionLabel(__('filament-jibble::resources.connections.table.actions.delete_bulk.confirm'))
+                    ->modalCancelActionLabel(__('filament-jibble::resources.connections.table.actions.delete_bulk.cancel'))
+                    ->action(function (Collection $records): void {
+                        $records->each(function (JibbleConnection $connection): void {
+                            $connection->deleteWithData();
+                        });
+                    }),
             ]);
     }
 

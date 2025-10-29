@@ -94,6 +94,18 @@ return [
             'actions' => [
                 'sync' => 'Sync now',
                 'sync_all' => 'Sync All',
+                'delete' => [
+                    'heading' => 'Delete connection?',
+                    'description' => 'Deleting this connection will permanently remove all linked Jibble data. This cannot be undone.',
+                    'confirm' => 'Delete connection',
+                    'cancel' => 'Cancel',
+                ],
+                'delete_bulk' => [
+                    'heading' => 'Delete selected connections?',
+                    'description' => 'Deleting the selected connections will permanently remove all linked Jibble data. This cannot be undone.',
+                    'confirm' => 'Delete connections',
+                    'cancel' => 'Cancel',
+                ],
             ],
         ],
         'notifications' => [
@@ -128,6 +140,20 @@ return [
                     'label' => 'Email',
                     'with' => 'With email',
                     'without' => 'Without email',
+                ],
+            ],
+            'actions' => [
+                'delete' => [
+                    'heading' => 'Delete Jibble user?',
+                    'description' => 'Deleting this user will permanently remove all of their synced data, including timesheets and time entries.',
+                    'confirm' => 'Delete user',
+                    'cancel' => 'Cancel',
+                ],
+                'delete_bulk' => [
+                    'heading' => 'Delete selected users?',
+                    'description' => 'Deleting the selected users will permanently remove all of their synced data, including timesheets and time entries.',
+                    'confirm' => 'Delete users',
+                    'cancel' => 'Cancel',
                 ],
             ],
         ],

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class JibbleConnection extends Model
 {
@@ -62,6 +63,14 @@ class JibbleConnection extends Model
     public function setSettings(string $key, mixed $value): void
     {
         $settings = $this->settings ?? [];
+
+        if ($this->shouldForgetSetting($value)) {
+            Arr::forget($settings, $key);
+            $this->settings = empty($settings) ? null : $settings;
+
+            return;
+        }
+
         Arr::set($settings, $key, $value);
 
         $this->settings = $settings;
@@ -103,5 +112,53 @@ class JibbleConnection extends Model
     public function locations(): HasMany
     {
         return $this->hasMany(JibbleLocation::class, 'connection_id');
+    }
+
+    public function deleteWithData(): void
+    {
+        DB::transaction(function (): void {
+            $this->purgeRelatedRecords();
+            $this->forceDelete();
+        });
+    }
+
+    protected function purgeRelatedRecords(): void
+    {
+        $this->purgeConnectionRelation(JibbleTimeEntry::class);
+        $this->purgeConnectionRelation(JibbleTimesheet::class);
+        $this->purgeConnectionRelation(JibbleTimesheetSummary::class);
+        $this->purgeConnectionRelation(JibblePerson::class);
+        $this->purgeConnectionRelation(JibbleLocation::class);
+        $this->purgeConnectionRelation(JibbleSyncLog::class);
+    }
+
+    protected function purgeConnectionRelation(string $model): void
+    {
+        $query = $model::query()->where('connection_id', $this->getKey());
+
+        if (in_array(SoftDeletes::class, class_uses_recursive($model), true)) {
+            $query->withTrashed()->forceDelete();
+
+            return;
+        }
+
+        $query->delete();
+    }
+
+    protected function shouldForgetSetting(mixed $value): bool
+    {
+        if ($value === null) {
+            return true;
+        }
+
+        if (is_string($value) && trim($value) === '') {
+            return true;
+        }
+
+        if (is_array($value) && empty($value)) {
+            return true;
+        }
+
+        return false;
     }
 }

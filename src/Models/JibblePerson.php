@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
+use Illuminate\Support\Facades\DB;
 
 class JibblePerson extends Model
 {
@@ -48,5 +49,42 @@ class JibblePerson extends Model
     public function timesheets(): HasMany
     {
         return $this->hasMany(JibbleTimesheet::class, 'person_id');
+    }
+
+    public function deleteWithData(): void
+    {
+        DB::transaction(function (): void {
+            $this->purgeRelatedRecords();
+            $this->forceDelete();
+        });
+    }
+
+    protected function purgeRelatedRecords(): void
+    {
+        $this->purgePersonRelation(JibbleTimeEntry::class);
+        $this->purgePersonRelation(JibbleTimesheet::class);
+        $this->purgePersonRelation(JibbleTimesheetSummary::class);
+    }
+
+    protected function purgePersonRelation(string $model): void
+    {
+        $personId = $this->getKey();
+        $remoteId = $this->jibble_id;
+
+        $query = $model::query()->where(function ($builder) use ($personId, $remoteId): void {
+            $builder->where('person_id', $personId);
+
+            if ($remoteId) {
+                $builder->orWhere('jibble_person_id', $remoteId);
+            }
+        });
+
+        if (in_array(SoftDeletes::class, class_uses_recursive($model), true)) {
+            $query->withTrashed()->forceDelete();
+
+            return;
+        }
+
+        $query->delete();
     }
 }

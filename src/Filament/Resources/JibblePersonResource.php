@@ -6,6 +6,7 @@ use Gpos\FilamentJibble\Filament\Resources\JibblePersonResource\Pages;
 use Gpos\FilamentJibble\Models\JibbleConnection;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use BackedEnum;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Gpos\FilamentJibble\Support\TenantHelper;
@@ -20,6 +21,7 @@ use UnitEnum;
 use Illuminate\Support\Str;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class JibblePersonResource extends Resource
 {
@@ -88,9 +90,25 @@ class JibblePersonResource extends Resource
             ], layout: FiltersLayout::AboveContent)
             ->actions([
                 ViewAction::make(),
+                DeleteAction::make()
+                    ->modalHeading(__('filament-jibble::resources.people.table.actions.delete.heading'))
+                    ->modalDescription(__('filament-jibble::resources.people.table.actions.delete.description'))
+                    ->modalSubmitActionLabel(__('filament-jibble::resources.people.table.actions.delete.confirm'))
+                    ->modalCancelActionLabel(__('filament-jibble::resources.people.table.actions.delete.cancel'))
+                    ->color('danger')
+                    ->using(fn (JibblePerson $record) => $record->deleteWithData()),
             ])
             ->bulkActions([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()
+                    ->modalHeading(__('filament-jibble::resources.people.table.actions.delete_bulk.heading'))
+                    ->modalDescription(__('filament-jibble::resources.people.table.actions.delete_bulk.description'))
+                    ->modalSubmitActionLabel(__('filament-jibble::resources.people.table.actions.delete_bulk.confirm'))
+                    ->modalCancelActionLabel(__('filament-jibble::resources.people.table.actions.delete_bulk.cancel'))
+                    ->action(function (Collection $records): void {
+                        $records->each(function (JibblePerson $person): void {
+                            $person->deleteWithData();
+                        });
+                    }),
             ]);
     }
 
