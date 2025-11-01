@@ -4,7 +4,6 @@ namespace Gpos\FilamentJibble\Filament\Widgets;
 
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Models\JibbleTimeEntry;
@@ -399,7 +398,7 @@ class TimesheetHeatmap extends Widget implements HasForms
         return count($this->allPeople);
     }
 
-    public function form(Form|Schema $form): Form|Schema
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
