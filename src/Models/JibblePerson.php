@@ -128,7 +128,9 @@ class JibblePerson extends Model
             ->replace([' ', '-', '_'], '')
             ->toString();
 
-        if ($entryType !== 'clockin') {
+        $clockInTypes = ['clockin', 'in'];
+
+        if (! in_array($entryType, $clockInTypes, true)) {
             return false;
         }
 
