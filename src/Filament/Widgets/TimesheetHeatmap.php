@@ -12,9 +12,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Form;
 use Filament\Widgets\Widget;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TimesheetHeatmap extends Widget implements HasForms
@@ -72,6 +73,9 @@ class TimesheetHeatmap extends Widget implements HasForms
             $this->people = [];
             $this->allPeople = [];
             $this->hasAnyPeople = false;
+
+            Log::debug('TimesheetHeatmap: tenant required but not selected, widget hidden.');
+
             return;
         }
 
@@ -82,6 +86,11 @@ class TimesheetHeatmap extends Widget implements HasForms
                 ->startOfMonth()
                 ->startOfDay();
         } catch (\Exception $exception) {
+            Log::warning('TimesheetHeatmap: invalid month value, fallback to current month.', [
+                'month' => $this->month ?? null,
+                'exception' => $exception->getMessage(),
+            ]);
+
             $start = now()->startOfMonth()->startOfDay();
             $this->month = $start->format('Y-m');
             $this->syncFormState();
@@ -91,47 +100,66 @@ class TimesheetHeatmap extends Widget implements HasForms
 
         $this->days = $this->generateDayGrid($start, $end);
 
-        $personQuery = JibblePerson::query()
-            ->when($tenant, fn ($query) => $query->where($tenantColumn, $tenant->getKey()))
-            ->with([
-                'connection',
-                'timesheets' => function ($query) use ($start, $end) {
-                $query
-                    ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-                    ->orderBy('date');
-                },
-            ])
-            ->orderBy('full_name')
-            ->orderBy('email');
+        try {
+            $personQuery = JibblePerson::query()
+                ->when($tenant, fn ($query) => $query->where($tenantColumn, $tenant->getKey()))
+                ->with([
+                    'connection',
+                    'timesheets' => function ($query) use ($start, $end) {
+                        $query
+                            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                            ->orderBy('date');
+                    },
+                ])
+                ->orderBy('full_name')
+                ->orderBy('email');
 
-        $people = $personQuery->get();
+            $people = $personQuery->get();
 
-        $latestEntries = collect();
+            $latestEntries = collect();
 
-        if ($people->isNotEmpty()) {
-            $latestEntries = JibbleTimeEntry::query()
-                ->whereIn('person_id', $people->pluck('id'))
-                ->whereNull('deleted_at')
-                ->orderByDesc('time')
-                ->orderByDesc('created_at')
-                ->get()
-                ->unique('person_id')
-                ->keyBy('person_id');
+            if ($people->isNotEmpty()) {
+                $latestEntries = JibbleTimeEntry::query()
+                    ->whereIn('person_id', $people->pluck('id'))
+                    ->whereNull('deleted_at')
+                    ->orderByDesc('time')
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->unique('person_id')
+                    ->keyBy('person_id');
+            }
+
+            $this->allPeople = $people
+                ->map(function (JibblePerson $person) use ($latestEntries): array {
+                    if ($latestEntries->has($person->getKey())) {
+                        $person->setRelation('latestTimeEntry', $latestEntries->get($person->getKey()));
+                    }
+
+                    return $this->mapPerson($person);
+                })
+                ->all();
+
+            $this->applySearchFilter();
+
+            $this->hasAnyPeople = ! empty($this->allPeople);
+
+            Log::debug('TimesheetHeatmap: data loaded', [
+                'people_count' => count($this->allPeople),
+                'tenant' => $tenant?->getKey(),
+                'month' => $this->month,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('TimesheetHeatmap: failed to load data', [
+                'tenant' => $tenant?->getKey(),
+                'month' => $this->month,
+                'exception' => $exception,
+            ]);
+
+            $this->days = [];
+            $this->people = [];
+            $this->allPeople = [];
+            $this->hasAnyPeople = false;
         }
-
-        $this->allPeople = $people
-            ->map(function (JibblePerson $person) use ($latestEntries): array {
-                if ($latestEntries->has($person->getKey())) {
-                    $person->setRelation('latestTimeEntry', $latestEntries->get($person->getKey()));
-                }
-
-                return $this->mapPerson($person);
-            })
-            ->all();
-
-        $this->applySearchFilter();
-
-        $this->hasAnyPeople = ! empty($this->allPeople);
     }
 
     /**
@@ -370,7 +398,7 @@ class TimesheetHeatmap extends Widget implements HasForms
         return count($this->allPeople);
     }
 
-    public function form(Schema $form): Schema
+    public function form(Form $form): Form
     {
         return $form
             ->schema([
