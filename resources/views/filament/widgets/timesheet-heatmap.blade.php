@@ -145,10 +145,17 @@
                                         <span
                                             title="{{ $person['is_online'] ?? false ? __('filament-jibble::resources.widgets.timesheet_heatmap.online') : __('filament-jibble::resources.widgets.timesheet_heatmap.offline') }}"
                                             @class([
+                                                // Base shape/position so it's always visible even without custom CSS
+                                                'block absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-white shadow-[0_0_0_1px_rgba(15,23,42,0.08)] dark:ring-slate-900 dark:shadow-[0_0_0_1px_rgba(148,163,184,0.35)]',
+
+                                                // Keep original semantic classes (if custom CSS is loaded they'll also apply)
                                                 'status-indicator',
-                                                'status-indicator--online' => $person['is_online'] ?? false,
-                                                'status-indicator--offline' => ! ($person['is_online'] ?? false),
+
+                                                // Color by status
+                                                'bg-green-500 status-indicator--online' => $person['is_online'] ?? false,
+                                                'bg-gray-300 dark:bg-slate-600 status-indicator--offline' => ! ($person['is_online'] ?? false),
                                             ])
+                                            style="position:absolute; bottom:-2px; right:-2px; height:12px; width:12px; border-radius:9999px; border:2px solid #ffffff; box-shadow: 0 0 0 1px rgba(15,23,42,0.08); {{ ($person['is_online'] ?? false) ? 'background-color:#22c55e;' : 'background-color:#d1d5db;' }}"
                                         ></span>
                                     </div>
                                     <div class="min-w-0">
