@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class JibblePerson extends Model
 {
@@ -96,6 +99,41 @@ class JibblePerson extends Model
     public function timesheets(): HasMany
     {
         return $this->hasMany(JibbleTimesheet::class, 'person_id');
+    }
+
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(JibbleTimeEntry::class, 'person_id');
+    }
+
+    public function latestTimeEntry(): HasOne
+    {
+        return $this->hasOne(JibbleTimeEntry::class, 'person_id')->latestOfMany('time');
+    }
+
+    public function isOnline(): bool
+    {
+        $entry = $this->relationLoaded('latestTimeEntry')
+            ? $this->latestTimeEntry
+            : $this->latestTimeEntry()->first();
+
+        if (! $entry) {
+            return false;
+        }
+
+        if (Str::lower((string) $entry->type) !== 'clockin') {
+            return false;
+        }
+
+        if (! empty($entry->next_entry_id)) {
+            return false;
+        }
+
+        if ($entry->time && Carbon::parse($entry->time)->lt(now()->subHours(24))) {
+            return false;
+        }
+
+        return true;
     }
 
     public function deleteWithData(): void

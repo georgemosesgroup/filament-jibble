@@ -701,6 +701,8 @@ return [
             'search_placeholder' => 'Поиск по имени или email…',
             'search_empty' => 'Нет сотрудников, подходящих под фильтры.',
             'legend_title' => 'Легенда',
+            'online' => 'Онлайн',
+            'offline' => 'Офлайн',
             'statuses' => [
                 'missing' => 'Нет данных',
                 'off' => 'Выходной',

@@ -701,6 +701,8 @@ return [
             'search_placeholder' => 'Search name or email…',
             'search_empty' => 'No team members match your filters.',
             'legend_title' => 'Legend',
+            'online' => 'Online',
+            'offline' => 'Offline',
             'statuses' => [
                 'missing' => 'No data',
                 'off' => 'Off / Holiday',

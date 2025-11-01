@@ -2,6 +2,58 @@
     $tenant = filament()->getTenant();
 @endphp
 
+@once
+    <style>
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot {
+            display: block;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 0.375rem;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--legend {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 0.875rem;
+            width: 0.875rem;
+            border-radius: 0.25rem;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--missing {
+            background-color: #e5e7eb;
+        }
+
+        .dark .fi-widget-timesheet-heatmap .fi-timesheet-slot--missing {
+            background-color: #1f2937;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--off {
+            background-color: #d1d5db;
+        }
+
+        .dark .fi-widget-timesheet-heatmap .fi-timesheet-slot--off {
+            background-color: #374151;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--target {
+            background-color: #22c55e;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--extended {
+            background-color: #facc15;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--overtime {
+            background-color: #ef4444;
+        }
+
+        .fi-widget-timesheet-heatmap .fi-timesheet-slot--excessive {
+            background-color: #991b1b;
+        }
+    </style>
+@endonce
+
 <x-filament::widget class="fi-widget-timesheet-heatmap">
     <x-filament::card>
         <div class="mb-4">
@@ -57,8 +109,19 @@
                         <tr class="align-middle" wire:key="timesheet-person-{{ $person['id'] ?? uniqid() }}">
                             <td class="pr-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
-                                        {{ $person['initials'] ?? '??' }}
+                                    <div class="relative">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">
+                                            {{ $person['initials'] ?? '??' }}
+                                        </div>
+                                        <span
+                                            style="bottom: -2px; right: -2px;"
+                                            title="{{ $person['is_online'] ?? false ? __('filament-jibble::resources.widgets.timesheet_heatmap.online') : __('filament-jibble::resources.widgets.timesheet_heatmap.offline') }}"
+                                            @class([
+                                                'absolute h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-900',
+                                                'bg-emerald-400 shadow-sm' => $person['is_online'] ?? false,
+                                                'bg-gray-400 dark:bg-gray-500' => ! ($person['is_online'] ?? false),
+                                            ])
+                                        ></span>
                                     </div>
                                     <div class="min-w-0">
                                         <div class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -124,35 +187,3 @@
     </x-filament::card>
 
 </x-filament::widget>
-
-когда я убираю
-@once
-    <style>
-        .fi-widget-timesheet-heatmap .timesheet-slot {
-            display: block;
-            height: 1.25rem;
-            width: 1.25rem;
-            border-radius: 0.375rem;
-        }
-
-        .fi-widget-timesheet-heatmap .timesheet-slot--missing {
-            background-color: #e5e7eb;
-        }
-
-        .fi-widget-timesheet-heatmap .timesheet-slot--off {
-            background-color: #d1d5db;
-        }
-
-        .fi-widget-timesheet-heatmap .timesheet-slot--target {
-            background-color: #22c55e;
-        }
-
-        .fi-widget-timesheet-heatmap .timesheet-slot--extended {
-            background-color: #facc15;
-        }
-
-        .fi-widget-timesheet-heatmap .timesheet-slot--overtime {
-            background-color: #ef4444;
-        }
-    </style>
-@endonce

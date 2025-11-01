@@ -92,11 +92,15 @@ class TimesheetHeatmap extends Widget implements HasForms
 
         $personQuery = JibblePerson::query()
             ->when($tenant, fn ($query) => $query->where($tenantColumn, $tenant->getKey()))
-            ->with(['connection', 'timesheets' => function ($query) use ($start, $end) {
+            ->with([
+                'connection',
+                'latestTimeEntry',
+                'timesheets' => function ($query) use ($start, $end) {
                 $query
                     ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
                     ->orderBy('date');
-            }])
+                },
+            ])
             ->orderBy('full_name')
             ->orderBy('email');
 
@@ -174,6 +178,7 @@ class TimesheetHeatmap extends Widget implements HasForms
             'slots' => $slots,
             'total_minutes' => $totalMinutes,
             'total_formatted' => $this->formatMinutes($totalMinutes),
+            'is_online' => $person->isOnline(),
         ];
     }
 
