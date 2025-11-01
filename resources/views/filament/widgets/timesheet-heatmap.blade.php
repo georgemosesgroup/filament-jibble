@@ -41,6 +41,7 @@
         }
 
         .fi-widget-timesheet-heatmap .status-indicator {
+            display: block;
             position: absolute;
             bottom: -2px;
             right: -2px;
@@ -62,6 +63,10 @@
 
         .fi-widget-timesheet-heatmap .status-indicator--offline {
             background-color: #d1d5db;
+        }
+
+        .dark .fi-widget-timesheet-heatmap .status-indicator--offline {
+            background-color: #475569;
         }
 
         .fi-widget-timesheet-heatmap .fi-timesheet-slot--extended {
