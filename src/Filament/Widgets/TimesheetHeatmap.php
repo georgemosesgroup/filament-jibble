@@ -14,6 +14,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -398,7 +399,7 @@ class TimesheetHeatmap extends Widget implements HasForms
         return count($this->allPeople);
     }
 
-    public function form(Form $form): Form
+    public function form(Form|Schema $form): Form|Schema
     {
         return $form
             ->schema([
