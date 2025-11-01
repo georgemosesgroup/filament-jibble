@@ -2,8 +2,6 @@
 
 namespace Gpos\FilamentJibble\Filament\Widgets;
 
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Schema;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Models\JibbleTimeEntry;
@@ -14,8 +12,9 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Filament\Widgets\Widget;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TimesheetHeatmap extends Widget implements HasForms
@@ -74,8 +73,6 @@ class TimesheetHeatmap extends Widget implements HasForms
             $this->allPeople = [];
             $this->hasAnyPeople = false;
 
-            Log::debug('TimesheetHeatmap: tenant required but not selected, widget hidden.');
-
             return;
         }
 
@@ -86,11 +83,6 @@ class TimesheetHeatmap extends Widget implements HasForms
                 ->startOfMonth()
                 ->startOfDay();
         } catch (\Exception $exception) {
-            Log::warning('TimesheetHeatmap: invalid month value, fallback to current month.', [
-                'month' => $this->month ?? null,
-                'exception' => $exception->getMessage(),
-            ]);
-
             $start = now()->startOfMonth()->startOfDay();
             $this->month = $start->format('Y-m');
             $this->syncFormState();
@@ -143,18 +135,7 @@ class TimesheetHeatmap extends Widget implements HasForms
 
             $this->hasAnyPeople = ! empty($this->allPeople);
 
-            Log::debug('TimesheetHeatmap: data loaded', [
-                'people_count' => count($this->allPeople),
-                'tenant' => $tenant?->getKey(),
-                'month' => $this->month,
-            ]);
         } catch (\Throwable $exception) {
-            Log::error('TimesheetHeatmap: failed to load data', [
-                'tenant' => $tenant?->getKey(),
-                'month' => $this->month,
-                'exception' => $exception,
-            ]);
-
             $this->days = [];
             $this->people = [];
             $this->allPeople = [];
@@ -398,10 +379,10 @@ class TimesheetHeatmap extends Widget implements HasForms
         return count($this->allPeople);
     }
 
-    public static function configure(Schema $schema): Schema
+    public function form(Schema $form): Schema
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Grid::make(12)->schema([
                     TextInput::make('search')
                         ->label(false)
@@ -423,7 +404,6 @@ class TimesheetHeatmap extends Widget implements HasForms
                         ->native(false)
                         ->live()
                         ->afterStateUpdated(fn () => $this->updateMonthFromParts())
-                        ->native(false)
                         ->columnSpan(['default' => 6, 'lg' => 3]),
                     Select::make('year_part')
                         ->label(__('filament-jibble::resources.widgets.timesheet_heatmap.year'))
@@ -433,7 +413,6 @@ class TimesheetHeatmap extends Widget implements HasForms
                         ->native(false)
                         ->live()
                         ->afterStateUpdated(fn () => $this->updateMonthFromParts())
-                        ->native(false)
                         ->columnSpan(['default' => 6, 'lg' => 3]),
                 ])->columns(12),
             ])
