@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Gpos\FilamentJibble\Filament\Widgets\TimesheetHeatmap;
 use UnitEnum;
@@ -40,9 +41,165 @@ class JibblePersonResource extends Resource
     {
         return $schema
             ->components([
-                Forms\Components\TextInput::make('full_name')->disabled(),
-                Forms\Components\TextInput::make('email')->disabled(),
-                Forms\Components\Textarea::make('payload')->disabled()->rows(12),
+                Forms\Components\Section::make(__('filament-jibble::resources.people.sections.person'))
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('full_name')
+                                    ->label(__('filament-jibble::resources.people.fields.full_name'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('preferred_name')
+                                    ->label(__('filament-jibble::resources.people.fields.preferred_name'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('email')
+                                    ->label(__('filament-jibble::resources.people.fields.email'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('phone_number')
+                                    ->label(__('filament-jibble::resources.people.fields.phone_number'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('country_code')
+                                    ->label(__('filament-jibble::resources.people.fields.country_code'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('role')
+                                    ->label(__('filament-jibble::resources.people.fields.role'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('status')
+                                    ->label(__('filament-jibble::resources.people.fields.status'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('code')
+                                    ->label(__('filament-jibble::resources.people.fields.code'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('pin_code')
+                                    ->label(__('filament-jibble::resources.people.fields.pin_code'))
+                                    ->disabled(),
+                                Forms\Components\Placeholder::make('has_embeddings')
+                                    ->label(__('filament-jibble::resources.people.fields.has_embeddings'))
+                                    ->content(function (?JibblePerson $record): string {
+                                        if (is_null($record?->has_embeddings)) {
+                                            return __('filament-jibble::resources.common.placeholders.not_available');
+                                        }
+
+                                        return $record->has_embeddings
+                                            ? __('filament-jibble::resources.common.booleans.with')
+                                            : __('filament-jibble::resources.common.booleans.without');
+                                    }),
+                                Forms\Components\TextInput::make('nfc_token')
+                                    ->label(__('filament-jibble::resources.people.fields.nfc_token'))
+                                    ->disabled(),
+                            ]),
+                    ]),
+                Forms\Components\Section::make(__('filament-jibble::resources.people.sections.employment'))
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('organization_id')
+                                    ->label(__('filament-jibble::resources.people.fields.organization_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('group_id')
+                                    ->label(__('filament-jibble::resources.people.fields.group_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('position_id')
+                                    ->label(__('filament-jibble::resources.people.fields.position_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('employment_type_id')
+                                    ->label(__('filament-jibble::resources.people.fields.employment_type_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('user_id')
+                                    ->label(__('filament-jibble::resources.people.fields.user_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('calendar_id')
+                                    ->label(__('filament-jibble::resources.people.fields.calendar_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('schedule_id')
+                                    ->label(__('filament-jibble::resources.people.fields.schedule_id'))
+                                    ->disabled(),
+                                Forms\Components\TextInput::make('pay_period_definition_id')
+                                    ->label(__('filament-jibble::resources.people.fields.pay_period_definition_id'))
+                                    ->disabled(),
+                            ]),
+                    ]),
+                Forms\Components\Section::make(__('filament-jibble::resources.people.sections.activity'))
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\Placeholder::make('work_start_date')
+                                    ->label(__('filament-jibble::resources.people.fields.work_start_date'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->work_start_date?->toDateString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('join_date')
+                                    ->label(__('filament-jibble::resources.people.fields.join_date'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->join_date?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('latest_time_entry_time')
+                                    ->label(__('filament-jibble::resources.people.fields.latest_time_entry_time'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->latest_time_entry_time?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('invited_at')
+                                    ->label(__('filament-jibble::resources.people.fields.invited_at'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->invited_at?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('removed_at')
+                                    ->label(__('filament-jibble::resources.people.fields.removed_at'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->removed_at?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('jibble_created_at')
+                                    ->label(__('filament-jibble::resources.people.fields.jibble_created_at'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->jibble_created_at?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                                Forms\Components\Placeholder::make('jibble_updated_at')
+                                    ->label(__('filament-jibble::resources.people.fields.jibble_updated_at'))
+                                    ->content(fn (?JibblePerson $record): string => $record?->jibble_updated_at?->toDateTimeString()
+                                        ?? __('filament-jibble::resources.common.placeholders.not_available')),
+                            ]),
+                    ]),
+                Forms\Components\Section::make(__('filament-jibble::resources.people.sections.payload'))
+                    ->schema([
+                        Forms\Components\Textarea::make('overridden_properties')
+                            ->label(__('filament-jibble::resources.people.fields.overridden_properties'))
+                            ->rows(6)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('projects')
+                            ->label(__('filament-jibble::resources.people.fields.projects'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('work_types')
+                            ->label(__('filament-jibble::resources.people.fields.work_types'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('managers')
+                            ->label(__('filament-jibble::resources.people.fields.managers'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('unit_time_off_policies')
+                            ->label(__('filament-jibble::resources.people.fields.unit_time_off_policies'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('picture')
+                            ->label(__('filament-jibble::resources.people.fields.picture'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('managed_units')
+                            ->label(__('filament-jibble::resources.people.fields.managed_units'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('kiosks')
+                            ->label(__('filament-jibble::resources.people.fields.kiosks'))
+                            ->rows(4)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                        Forms\Components\Textarea::make('payload')
+                            ->label(__('filament-jibble::resources.people.fields.payload'))
+                            ->rows(12)
+                            ->formatStateUsing(fn ($state): ?string => static::formatJson($state))
+                            ->disabled(),
+                    ]),
             ]);
     }
 
@@ -58,6 +215,15 @@ class JibblePersonResource extends Resource
                     ->label(__('filament-jibble::resources.people.table.columns.email'))
                     ->copyable()
                     ->toggleable(),
+                TextColumn::make('preferred_name')
+                    ->label(__('filament-jibble::resources.people.table.columns.preferred_name'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('role')
+                    ->label(__('filament-jibble::resources.people.table.columns.role'))
+                    ->toggleable(),
+                TextColumn::make('phone_number')
+                    ->label(__('filament-jibble::resources.people.table.columns.phone_number'))
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('connection.name')
                     ->label(__('filament-jibble::resources.people.table.columns.connection'))
                     ->toggleable(),
@@ -69,6 +235,21 @@ class JibblePersonResource extends Resource
                     'removed' => 'gray',
                     default => 'gray',
                 }),
+                TextColumn::make('code')
+                    ->label(__('filament-jibble::resources.people.table.columns.code'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('work_start_date')
+                    ->label(__('filament-jibble::resources.people.table.columns.work_start_date'))
+                    ->date()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('latest_time_entry_time')
+                    ->label(__('filament-jibble::resources.people.table.columns.latest_time_entry_time'))
+                    ->dateTime()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('has_embeddings')
+                    ->label(__('filament-jibble::resources.people.table.columns.has_embeddings'))
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label(__('filament-jibble::resources.people.table.columns.created_at'))
                     ->dateTime()
@@ -172,5 +353,20 @@ class JibblePersonResource extends Resource
     public static function getPluralLabel(): string
     {
         return __('filament-jibble::resources.people.plural');
+    }
+
+    protected static function formatJson(mixed $state): ?string
+    {
+        if (blank($state)) {
+            return null;
+        }
+
+        if (is_string($state)) {
+            return $state;
+        }
+
+        $encoded = json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        return $encoded === false ? null : $encoded;
     }
 }

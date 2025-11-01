@@ -14,6 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -151,15 +152,72 @@ class SyncPeopleJob implements ShouldQueue
             ],
             [
                 $tenantColumn => $connection->getTenantKey(),
+                'organization_id' => Arr::get($payload, 'organizationId'),
+                'overridden_properties' => Arr::get($payload, 'overriddenProperties'),
+                'calendar_id' => Arr::get($payload, 'calendarId'),
+                'schedule_id' => Arr::get($payload, 'scheduleId'),
+                'pay_period_definition_id' => Arr::get($payload, 'payPeriodDefinitionId'),
+                'group_id' => Arr::get($payload, 'groupId') ?? Arr::get($payload, 'group.id'),
+                'position_id' => Arr::get($payload, 'positionId') ?? Arr::get($payload, 'position.id'),
+                'employment_type_id' => Arr::get($payload, 'employmentTypeId') ?? Arr::get($payload, 'employmentType.id'),
+                'user_id' => Arr::get($payload, 'userId') ?? Arr::get($payload, 'user.id'),
                 'email' => Arr::get($payload, 'email'),
+                'phone_number' => Arr::get($payload, 'phoneNumber'),
+                'country_code' => Arr::get($payload, 'countryCode'),
                 'first_name' => Arr::get($payload, 'firstName'),
                 'last_name' => Arr::get($payload, 'lastName'),
                 'full_name' => Arr::get($payload, 'fullName'),
+                'preferred_name' => Arr::get($payload, 'preferredName'),
+                'role' => Arr::get($payload, 'role'),
+                'code' => Arr::get($payload, 'code'),
+                'pin_code' => Arr::get($payload, 'pinCode'),
                 'status' => Arr::get($payload, 'status'),
+                'has_embeddings' => Arr::get($payload, 'hasEmbeddings'),
+                'nfc_token' => Arr::get($payload, 'nfcToken'),
+                'work_start_date' => $this->parseDate(Arr::get($payload, 'workStartDate')),
+                'join_date' => $this->parseDateTime(Arr::get($payload, 'joinDate')),
+                'latest_time_entry_time' => $this->parseDateTime(Arr::get($payload, 'latestTimeEntryTime')),
+                'invited_at' => $this->parseDateTime(Arr::get($payload, 'invitedAt')),
+                'removed_at' => $this->parseDateTime(Arr::get($payload, 'removedAt')),
+                'jibble_created_at' => $this->parseDateTime(Arr::get($payload, 'createdAt')),
+                'jibble_updated_at' => $this->parseDateTime(Arr::get($payload, 'updatedAt')),
+                'projects' => Arr::get($payload, 'projects'),
+                'work_types' => Arr::get($payload, 'workTypes'),
+                'managers' => Arr::get($payload, 'managers'),
+                'unit_time_off_policies' => Arr::get($payload, 'unitTimeOffPolicies'),
+                'picture' => Arr::get($payload, 'picture'),
+                'managed_units' => Arr::get($payload, 'managedUnits'),
+                'kiosks' => Arr::get($payload, 'kiosks'),
                 'payload' => $payload,
             ],
         );
 
         return true;
+    }
+
+    private function parseDateTime(?string $value): ?Carbon
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function parseDate(?string $value): ?Carbon
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->startOfDay();
+        } catch (Throwable) {
+            return null;
+        }
     }
 }
