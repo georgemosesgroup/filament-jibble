@@ -49,6 +49,7 @@ return new class extends Migration
             $addTenantColumn($table);
             $table->uuid('connection_id')->index();
             $table->string('jibble_id')->index();
+            // Extended metadata synced from the Jibble API
             $table->string('organization_id')->nullable()->index();
             $table->json('overridden_properties')->nullable();
             $table->string('calendar_id')->nullable()->index();
