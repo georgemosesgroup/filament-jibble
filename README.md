@@ -57,6 +57,26 @@ A fresh Laravel 11 + Filament 4 application prepared to integrate the complete [
    ```
    Visit `http://localhost:8000/admin` to access the Filament panel. Use `php artisan make:filament-user` to create login credentials.
 
+## Publishing Package Assets
+
+The package ships with publishable configuration files, database migrations, translations, and Blade templates. Run the commands you need from the list below after installing the package or whenever you want to refresh the stubs:
+
+```bash
+# Publish both config files: config/filament-jibble.php and config/jibble.php
+php artisan vendor:publish --provider="Gpos\FilamentJibble\Providers\FilamentJibbleServiceProvider" --tag=filament-jibble-config
+
+# Publish database migrations into your application (only once before running them)
+php artisan vendor:publish --provider="Gpos\FilamentJibble\Providers\FilamentJibbleServiceProvider" --tag=filament-jibble-migrations
+
+# Publish Blade templates to resources/views/vendor/filament-jibble for customization
+php artisan vendor:publish --provider="Gpos\FilamentJibble\Providers\FilamentJibbleServiceProvider" --tag=filament-jibble-views
+
+# Publish translation files (PHP + JSON) to lang/vendor/filament-jibble
+php artisan vendor:publish --provider="Gpos\FilamentJibble\Providers\FilamentJibbleServiceProvider" --tag=filament-jibble-translations
+```
+
+After publishing, make your adjustments in the copied files. Re-run the relevant `vendor:publish` command with the `--force` flag if you need to overwrite the local copies with the latest package versions.
+
 ## Jibble API Integration
 
 All integration logic lives under `app/Services/Jibble`:
