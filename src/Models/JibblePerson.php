@@ -123,7 +123,12 @@ class JibblePerson extends Model
             return false;
         }
 
-        if (Str::lower((string) $entry->type) !== 'clockin') {
+        $entryType = Str::of((string) $entry->type)
+            ->lower()
+            ->replace([' ', '-', '_'], '')
+            ->toString();
+
+        if ($entryType !== 'clockin') {
             return false;
         }
 
