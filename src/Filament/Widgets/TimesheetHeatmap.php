@@ -2,6 +2,9 @@
 
 namespace Gpos\FilamentJibble\Filament\Widgets;
 
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
 use Gpos\FilamentJibble\Models\JibbleTimeEntry;
@@ -10,8 +13,6 @@ use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Form;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Widgets\Widget;
@@ -215,7 +216,7 @@ class TimesheetHeatmap extends Widget implements HasForms
 
         $displayName = $person->full_name
             ?: trim(($person->first_name ?? '').' '.($person->last_name ?? ''))
-            ?: ($person->email ?? __('filament-jibble::resources.widgets.timesheet_heatmap.employee'));
+                ?: ($person->email ?? __('filament-jibble::resources.widgets.timesheet_heatmap.employee'));
 
         return [
             'id' => $person->getKey(),
