@@ -108,7 +108,9 @@ class JibblePerson extends Model
 
     public function latestTimeEntry(): HasOne
     {
-        return $this->hasOne(JibbleTimeEntry::class, 'person_id')->latestOfMany('time');
+        return $this->hasOne(JibbleTimeEntry::class, 'person_id')
+            ->orderByDesc('time')
+            ->orderByDesc('created_at');
     }
 
     public function isOnline(): bool
