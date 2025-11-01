@@ -2,7 +2,7 @@
     $tenant = filament()->getTenant();
 @endphp
 
-@once
+@push('styles')
     <style>
         .fi-widget-timesheet-heatmap .fi-timesheet-slot {
             display: block;
@@ -52,7 +52,7 @@
             background-color: #991b1b;
         }
     </style>
-@endonce
+@endpush
 
 <x-filament::widget class="fi-widget-timesheet-heatmap">
     <x-filament::card>
