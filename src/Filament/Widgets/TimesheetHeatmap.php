@@ -4,6 +4,7 @@ namespace Gpos\FilamentJibble\Filament\Widgets;
 
 use Gpos\FilamentJibble\Models\JibblePerson;
 use Gpos\FilamentJibble\Models\JibbleTimesheet;
+use Gpos\FilamentJibble\Models\JibbleTimeEntry;
 use Gpos\FilamentJibble\Support\TenantHelper;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
@@ -94,7 +95,6 @@ class TimesheetHeatmap extends Widget implements HasForms
             ->when($tenant, fn ($query) => $query->where($tenantColumn, $tenant->getKey()))
             ->with([
                 'connection',
-                'latestTimeEntry',
                 'timesheets' => function ($query) use ($start, $end) {
                 $query
                     ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
@@ -104,9 +104,29 @@ class TimesheetHeatmap extends Widget implements HasForms
             ->orderBy('full_name')
             ->orderBy('email');
 
-        $this->allPeople = $personQuery
-            ->get()
-            ->map(fn (JibblePerson $person): array => $this->mapPerson($person))
+        $people = $personQuery->get();
+
+        $latestEntries = collect();
+
+        if ($people->isNotEmpty()) {
+            $latestEntries = JibbleTimeEntry::query()
+                ->whereIn('person_id', $people->pluck('id'))
+                ->whereNull('deleted_at')
+                ->orderByDesc('time')
+                ->orderByDesc('created_at')
+                ->get()
+                ->unique('person_id')
+                ->keyBy('person_id');
+        }
+
+        $this->allPeople = $people
+            ->map(function (JibblePerson $person) use ($latestEntries): array {
+                if ($latestEntries->has($person->getKey())) {
+                    $person->setRelation('latestTimeEntry', $latestEntries->get($person->getKey()));
+                }
+
+                return $this->mapPerson($person);
+            })
             ->all();
 
         $this->applySearchFilter();
