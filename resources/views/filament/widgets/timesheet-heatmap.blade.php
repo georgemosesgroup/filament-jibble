@@ -40,6 +40,30 @@
             background-color: #22c55e;
         }
 
+        .fi-widget-timesheet-heatmap .status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            height: 0.75rem; /* 12px */
+            width: 0.75rem;
+            border-radius: 9999px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.08);
+        }
+
+        .dark .fi-widget-timesheet-heatmap .status-indicator {
+            border-color: #0f172a;
+            box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.35);
+        }
+
+        .fi-widget-timesheet-heatmap .status-indicator--online {
+            background-color: #22c55e;
+        }
+
+        .fi-widget-timesheet-heatmap .status-indicator--offline {
+            background-color: #d1d5db;
+        }
+
         .fi-widget-timesheet-heatmap .fi-timesheet-slot--extended {
             background-color: #facc15;
         }
@@ -114,12 +138,11 @@
                                             {{ $person['initials'] ?? '??' }}
                                         </div>
                                         <span
-                                            style="bottom: -2px; right: -2px;"
                                             title="{{ $person['is_online'] ?? false ? __('filament-jibble::resources.widgets.timesheet_heatmap.online') : __('filament-jibble::resources.widgets.timesheet_heatmap.offline') }}"
                                             @class([
-                                                'absolute h-2.5 w-2.5 rounded-full border-2 border-white dark:border-slate-900',
-                                                'bg-emerald-400 shadow-sm' => $person['is_online'] ?? false,
-                                                'bg-gray-400 dark:bg-gray-500' => ! ($person['is_online'] ?? false),
+                                                'status-indicator',
+                                                'status-indicator--online' => $person['is_online'] ?? false,
+                                                'status-indicator--offline' => ! ($person['is_online'] ?? false),
                                             ])
                                         ></span>
                                     </div>
